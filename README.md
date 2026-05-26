@@ -1,209 +1,117 @@
 # 🌍 Sector AI Agent
-### RAG-based Domain Knowledge Agent — World Bank ITSEF Use Case
 
-A production-ready Retrieval-Augmented Generation (RAG) system that retrieves operational insights and lessons from sector documents, simulating the World Bank ITSEF (Independent Evaluation Group) knowledge agent architecture.
-
----
-
-## Architecture
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    Sector AI Agent Pipeline                     │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  Documents (PDF/TXT)                                            │
-│       ↓                                                         │
-│  DocumentIngestor  →  RecursiveCharacterTextSplitter            │
-│       ↓                                                         │
-│  OpenAIEmbeddings (text-embedding-3-small)                      │
-│       ↓                                                         │
-│  FAISS VectorStore  (persisted to disk)                         │
-│       ↓                                                         │
-│  MMR Retriever  (Maximal Marginal Relevance, k=5)               │
-│       ↓                                                         │
-│  ConversationalRetrievalChain + ConversationBufferMemory        │
-│       ↓                                                         │
-│  ChatOpenAI (gpt-4o-mini)  +  Domain System Prompt             │
-│       ↓                                                         │
-│  Grounded Answer + Source Citations                             │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
+**A RAG-based knowledge retrieval tool inspired by how development organizations like the World Bank manage and surface institutional knowledge.**
 
 ---
 
-## Features
+## Why I Built This
 
-- **RAG Pipeline**: LangChain + FAISS + OpenAI embeddings
-- **MMR Retrieval**: Maximal Marginal Relevance for diverse, non-redundant sources
-- **Conversational Memory**: Multi-turn dialogue with history awareness
-- **Dynamic Ingestion**: Add documents at runtime without rebuilding the index
-- **Domain Prompt**: ITSEF-style sector knowledge agent persona
-- **REST API**: FastAPI server exposing all agent capabilities
-- **Web UI**: Dark-themed dashboard with source citations
+One thing I've noticed working in international development is how much knowledge gets buried — in project completion reports, sector notes, implementation reviews — documents that exist but are rarely surfaced when they're actually needed.
+
+I wanted to explore what it would look like to build an AI system that could actually *read* those documents and answer questions from them in real time. Not just search keywords, but understand context, retrieve relevant passages, and synthesize insights the way a knowledgeable colleague would.
+
+This project is my attempt at that. It simulates the kind of knowledge agent the World Bank's ITSEF (Independent Evaluation Group) could use to help teams learn from past operations without having to manually dig through hundreds of reports.
 
 ---
 
-## Quickstart
+## What It Does
 
-### 1. Install dependencies
+You can ask it questions like:
 
-```bash
-cd backend
-pip install -r requirements.txt
-```
+- *"What are the common failure modes in fragile state projects?"*
+- *"How have water tariff reforms worked in MENA?"*
+- *"What lessons exist on community ownership in rural roads?"*
 
-### 2. Set your API key
-
-```bash
-cp .env.example .env
-# Edit .env and add your OPENAI_API_KEY
-```
-
-### 3. (Optional) Add your own documents
-
-Drop `.pdf` or `.txt` files into `data/sample_docs/`. If empty, the agent seeds 5 built-in ITSEF-style documents automatically.
-
-### 4. Start the backend API
-
-```bash
-cd backend
-uvicorn server:app --reload --port 8000
-```
-
-### 5. Open the UI
-
-Open `frontend/index.html` in your browser (or serve it):
-
-```bash
-cd frontend
-python -m http.server 3000
-# → http://localhost:3000
-```
-
-### 6. Initialize and query
-
-1. Enter your OpenAI API key in the sidebar
-2. Click **Initialize Agent**
-3. Ask sector questions!
+It searches a knowledge base of sector documents, retrieves the most relevant passages, and generates a grounded answer — with citations showing exactly which documents it pulled from.
 
 ---
 
-## CLI Mode
+## How It Works
 
-Skip the UI and query directly from terminal:
+The core architecture is a **Retrieval-Augmented Generation (RAG)** pipeline:
 
-```bash
-cd backend
-OPENAI_API_KEY=sk-... python rag_agent.py
 ```
+Sector Documents (PDF / TXT)
+        ↓
+Text Chunking (800-char chunks, 150 overlap)
+        ↓
+OpenAI Embeddings → FAISS Vector Index
+        ↓
+MMR Retrieval (finds diverse, relevant chunks)
+        ↓
+GPT-4o-mini generates answer with citations
+```
+
+**MMR (Maximal Marginal Relevance)** is the part I found most interesting to work with — instead of just returning the most similar chunks, it balances relevance *and* diversity, so you get a richer set of sources rather than five versions of the same paragraph.
 
 ---
 
-## API Endpoints
+## Tech Stack
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/init` | Initialize agent with config |
-| `POST` | `/query` | RAG query with conversation memory |
-| `POST` | `/add-document` | Add document text dynamically |
-| `POST` | `/upload` | Upload .txt file |
-| `POST` | `/reset` | Reset conversation history |
-| `GET` | `/health` | Health check |
-
-### Example: Query
-
-```bash
-curl -X POST http://localhost:8000/query \
-  -H "Content-Type: application/json" \
-  -d '{"question": "What are key lessons on road maintenance?"}'
-```
-
-### Example: Init
-
-```bash
-curl -X POST http://localhost:8000/init \
-  -H "Content-Type: application/json" \
-  -d '{
-    "openai_api_key": "sk-...",
-    "llm_model": "gpt-4o-mini",
-    "retriever_k": 5
-  }'
-```
+- **LangChain** — RAG pipeline and conversational memory
+- **FAISS** — local vector store for fast similarity search
+- **OpenAI** — embeddings (`text-embedding-3-small`) and chat (`gpt-4o-mini`)
+- **FastAPI** — REST API backend
+- **GitHub Pages** — frontend hosting
+- **Render** — backend deployment
 
 ---
 
 ## Built-in Knowledge Base
 
-The agent ships with 5 seed documents (real-format, synthetic content):
+The agent comes seeded with five synthetic but realistic documents modeled on real World Bank formats:
 
-| Document | Sector | Type |
-|----------|--------|------|
-| Rural Roads ICR (P123456) | Transport | ICR |
-| Digital Agriculture Sector Note | Agriculture | ITSEF Note |
-| Urban WASH PAD (P198765) | WASH | PAD |
-| Education ISR — West Africa | Education | ISR |
-| FCS Portfolio Synthesis | Cross-Cutting | Synthesis |
+| Document | Sector |
+|----------|--------|
+| Rural Roads ICR (P123456) | Transport |
+| Digital Agriculture Sector Note | Agriculture |
+| Urban WASH PAD (P198765) | WASH |
+| Education ISR — West Africa | Education |
+| FCS Portfolio Synthesis (45 projects) | Cross-Cutting |
 
----
 
-## Configuration Options
-
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| `llm_model` | `gpt-4o-mini` | OpenAI chat model |
-| `embedding_model` | `text-embedding-3-small` | Embedding model |
-| `chunk_size` | `800` | Characters per chunk |
-| `chunk_overlap` | `150` | Overlap between chunks |
-| `retriever_k` | `5` | Documents retrieved per query |
-| `temperature` | `0.2` | LLM temperature |
 
 ---
 
-## Project Structure
+## Try It
 
-```
-sector-ai-agent/
-├── backend/
-│   ├── rag_agent.py        # Core RAG pipeline (agent, chain, ingestor)
-│   ├── server.py           # FastAPI REST server
-│   └── requirements.txt    # Python dependencies
-├── frontend/
-│   └── index.html          # Single-file dashboard UI
-├── data/
-│   ├── sample_docs/        # Drop PDF/TXT documents here
-│   └── vectorstore/        # FAISS index (auto-created)
-├── .env.example            # Environment template
-└── README.md
+🌐 **Live Demo:** [sector-ai-agent on GitHub Pages](https://peps143.github.io/sector-ai-agent/frontend/index.html)
+
+ Just type a question.
+
+---
+
+## Run It Locally
+
+```bash
+git clone https://github.com/peps143/sector-ai-agent.git
+cd sector-ai-agent/backend
+pip install -r requirements.txt
+
+# Add your OpenAI key
+cp .env.example .env
+
+uvicorn server:app --reload --port 8000
 ```
 
----
-
-## Extending the Agent
-
-### Add a new sector
-
-Edit the `SECTOR_AGENT_PROMPT` in `rag_agent.py` to include domain-specific instructions.
-
-### Swap the vector store
-
-Replace `FAISS` with `Chroma`, `Pinecone`, or `Weaviate` — the `VectorStoreManager` class isolates this concern.
-
-### Add PDF support
-
-Ensure `pypdf` is installed (included in requirements), then drop PDFs into `data/sample_docs/`.
-
-### Multi-agent routing
-
-Wrap `SectorAgent` instances (one per sector) and add a router agent that classifies the query and dispatches.
+Then open `frontend/index.html` in your browser.
 
 ---
 
-## Cost Estimate
+## What I Learned
 
-| Operation | Model | Approx Cost |
-|-----------|-------|------------|
-| Embedding 5 seed docs | text-embedding-3-small | ~$0.0001 |
-| Per query (retrieval + generation) | gpt-4o-mini | ~$0.001 |
-| Full session (20 queries) | gpt-4o-mini | ~$0.02 |
+This project pushed me to understand things I hadn't worked with before — vector embeddings, semantic search, how LLMs use retrieved context to ground their answers. I also had to figure out deployment, CORS, environment variables, and why Python version mismatches can ruin your whole afternoon.
+
+The part that surprised me most was how much the *quality of the prompt* affects the output. The domain-specific system prompt — framing the model as an ITSEF sector knowledge agent — made a significant difference in how structured and useful the answers were.
+
+---
+
+## What's Next to Do
+
+- Add real World Bank ICR documents from the public repository
+- Build a multi-sector router that dispatches queries to specialist sub-agents
+- Experiment with Chroma or Pinecone for persistent cloud vector storage
+- Add a document comparison feature ("how did this project's approach differ from similar ones?")
+
+---
+
