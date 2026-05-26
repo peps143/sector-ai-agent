@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sector AI Agent — World Bank ITSEF Knowledge System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d1117;
+    --bg2: #161b22;
+    --bg3: #21262d;
+    --surface: #1c2128;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --text: #e6edf3;
+    --text2: #8b949e;
+    --text3: #6e7681;
+    --accent: #1f6feb;
+    --accent2: #388bfd;
+    --gold: #d29922;
+    --gold2: #e3b341;
+    --teal: #1b786e;
+    --teal2: #3bada1;
+    --green: #2ea043;
+    --red: #da3633;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+    --serif: 'Playfair Display', serif;
+    --radius: 8px;
+    --radius-lg: 12px;
+    --shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  /* ── HEADER ────────────────────────────────────────────────────── */
+  header {
+    grid-column: 1 / -1;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .header-logo {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--teal2) 100%);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+  .header-title {
+    font-family: var(--serif);
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+  .header-subtitle {
+    font-size: 11px;
+    color: var(--text3);
+    font-family: var(--mono);
+    letter-spacing: 0.5px;
+  }
+  .header-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text2);
+    font-family: var(--mono);
+  }
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--text3);
+    transition: background 0.3s;
+  }
+  .status-dot.ready { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .status-dot.loading { background: var(--gold2); animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  /* ── SIDEBAR ───────────────────────────────────────────────────── */
+  .sidebar {
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+  .sidebar-section {
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .sidebar-label {
+    font-size: 10px;
+    font-family: var(--mono);
+    color: var(--text3);
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  /* Setup form */
+  .form-group { margin-bottom: 12px; }
+  .form-group label {
+    display: block;
+    font-size: 11px;
+    color: var(--text2);
+    margin-bottom: 4px;
+    font-family: var(--mono);
+  }
+  .form-group input, .form-group select {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 7px 10px;
+    border-radius: var(--radius);
+    font-size: 12px;
+    font-family: var(--mono);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-group input:focus, .form-group select:focus {
+    border-color: var(--accent2);
+  }
+  .form-group input[type="password"] { letter-spacing: 2px; }
+
+  .btn {
+    width: 100%;
+    padding: 9px 16px;
+    border-radius: var(--radius);
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+  }
+  .btn-primary:hover { background: var(--accent2); }
+  .btn-primary:disabled { background: var(--bg3); color: var(--text3); cursor: not-allowed; }
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border2);
+    color: var(--text2);
+    margin-top: 6px;
+  }
+  .btn-ghost:hover { border-color: var(--border2); background: var(--bg3); color: var(--text); }
+
+  /* Suggested queries */
+  .query-chip {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text2);
+    padding: 8px 10px;
+    border-radius: var(--radius);
+    font-size: 11.5px;
+    font-family: var(--sans);
+    cursor: pointer;
+    margin-bottom: 6px;
+    line-height: 1.4;
+    transition: all 0.15s;
+  }
+  .query-chip:hover {
+    border-color: var(--accent);
+    color: var(--text);
+    background: rgba(31,111,235,0.08);
+  }
+  .chip-sector {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--gold2);
+    display: block;
+    margin-bottom: 2px;
+    letter-spacing: 0.5px;
+  }
+
+  /* Knowledge base panel */
+  .kb-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+  }
+  .kb-item:last-child { border-bottom: none; }
+  .kb-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .kb-icon.transport { background: rgba(31,111,235,0.15); color: var(--accent2); }
+  .kb-icon.agriculture { background: rgba(46,160,67,0.15); color: var(--green); }
+  .kb-icon.wash { background: rgba(59,173,161,0.15); color: var(--teal2); }
+  .kb-icon.education { background: rgba(210,153,34,0.15); color: var(--gold2); }
+  .kb-icon.fcs { background: rgba(218,54,51,0.15); color: #ff7b72; }
+  .kb-meta { color: var(--text3); font-family: var(--mono); }
+
+  /* Doc upload */
+  .upload-zone {
+    border: 1px dashed var(--border2);
+    border-radius: var(--radius);
+    padding: 14px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 12px;
+    color: var(--text3);
+  }
+  .upload-zone:hover { border-color: var(--accent); color: var(--text2); background: rgba(31,111,235,0.05); }
+
+  /* ── MAIN CHAT ─────────────────────────────────────────────────── */
+  .main {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .chat-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* Welcome */
+  .welcome {
+    max-width: 640px;
+    margin: 40px auto;
+    text-align: center;
+  }
+  .welcome-icon {
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--teal2) 100%);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin: 0 auto 20px;
+  }
+  .welcome h1 {
+    font-family: var(--serif);
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    line-height: 1.25;
+  }
+  .welcome p { color: var(--text2); font-size: 14px; line-height: 1.6; }
+  .pipeline-steps {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    justify-content: center;
+    margin: 20px 0;
+    flex-wrap: wrap;
+  }
+  .pipeline-step {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text2);
+  }
+  .pipeline-arrow { color: var(--text3); font-size: 12px; }
+
+  /* Messages */
+  .message { display: flex; gap: 12px; max-width: 860px; }
+  .message.user { flex-direction: row-reverse; margin-left: auto; }
+  .message.system { flex-direction: row; margin-right: auto; }
+  .avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .avatar.agent {
+    background: linear-gradient(135deg, var(--accent) 0%, var(--teal2) 100%);
+  }
+  .avatar.user { background: var(--bg3); border: 1px solid var(--border2); }
+
+  .bubble {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-size: 14px;
+    line-height: 1.65;
+    max-width: 720px;
+  }
+  .message.user .bubble {
+    background: rgba(31,111,235,0.12);
+    border-color: rgba(31,111,235,0.3);
+  }
+
+  /* Sources panel */
+  .sources {
+    margin-top: 12px;
+    border-top: 1px solid var(--border);
+    padding-top: 10px;
+  }
+  .sources-label {
+    font-size: 10px;
+    font-family: var(--mono);
+    color: var(--text3);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .source-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 8px 10px;
+    margin-bottom: 6px;
+    font-size: 11.5px;
+  }
+  .source-file {
+    font-family: var(--mono);
+    color: var(--accent2);
+    font-size: 10px;
+    margin-bottom: 4px;
+  }
+  .source-snippet { color: var(--text2); line-height: 1.45; }
+
+  /* Thinking indicator */
+  .thinking {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text3);
+    font-size: 13px;
+    font-family: var(--mono);
+    padding: 8px 0;
+  }
+  .thinking-dots span {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent2);
+    animation: bounce 1.2s infinite;
+  }
+  .thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%,80%,100% { transform: translateY(0); opacity: 0.4; } 40% { transform: translateY(-6px); opacity: 1; } }
+
+  /* ── INPUT BAR ─────────────────────────────────────────────────── */
+  .input-bar {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 16px 24px;
+  }
+  .input-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    max-width: 860px;
+  }
+  .input-wrap {
+    flex: 1;
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    transition: border-color 0.2s;
+    padding: 10px 14px;
+  }
+  .input-wrap:focus-within { border-color: var(--accent2); }
+  #query-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    resize: none;
+    min-height: 22px;
+    max-height: 120px;
+    line-height: 1.5;
+  }
+  #query-input::placeholder { color: var(--text3); }
+  .send-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--accent);
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .send-btn:hover { background: var(--accent2); }
+  .send-btn:active { transform: scale(0.94); }
+  .send-btn:disabled { background: var(--bg3); color: var(--text3); cursor: not-allowed; }
+  .input-hint {
+    margin-top: 6px;
+    font-size: 11px;
+    color: var(--text3);
+    font-family: var(--mono);
+  }
+
+  /* Toast */
+  #toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    padding: 10px 16px;
+    font-size: 13px;
+    z-index: 1000;
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all 0.3s;
+  }
+  #toast.show { transform: translateY(0); opacity: 1; }
+  #toast.error { border-color: var(--red); color: #ff7b72; }
+  #toast.success { border-color: var(--green); color: #56d364; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-brand">
+    <div class="header-logo">🌍</div>
+    <div>
+      <div class="header-title">Sector AI Agent</div>
+      <div class="header-subtitle">ITSEF Knowledge Retrieval System · v1.0</div>
+    </div>
+  </div>
+  <div class="header-status">
+    <div class="status-dot" id="status-dot"></div>
+    <span id="status-label">NOT INITIALIZED</span>
+  </div>
+</header>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+
+  <!-- Setup -->
+  <div class="sidebar-section">
+    <div class="sidebar-label">⚙ Configuration</div>
+    <div class="form-group">
+      <label>OpenAI API Key</label>
+      <input type="password" id="api-key" placeholder="sk-..." />
+    </div>
+    <div class="form-group">
+      <label>LLM Model</label>
+      <select id="llm-model">
+        <option value="gpt-4o-mini">gpt-4o-mini (fast)</option>
+        <option value="gpt-4o">gpt-4o (quality)</option>
+        <option value="gpt-4-turbo">gpt-4-turbo</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Chunk Size</label>
+      <input type="number" id="chunk-size" value="800" min="200" max="2000" />
+    </div>
+    <div class="form-group">
+      <label>Retriever k</label>
+      <input type="number" id="retriever-k" value="5" min="1" max="20" />
+    </div>
+    <button class="btn btn-primary" id="init-btn" onclick="initAgent()">Initialize Agent</button>
+    <button class="btn btn-ghost" onclick="resetConversation()">↺ Reset Conversation</button>
+  </div>
+
+  <!-- RAG Pipeline Viz -->
+  <div class="sidebar-section">
+    <div class="sidebar-label">⬡ RAG Pipeline</div>
+    <div style="font-size: 11px; color: var(--text3); font-family: var(--mono); line-height: 2;">
+      <div id="step-ingest" style="display:flex;align-items:center;gap:6px;opacity:0.4">
+        <span style="color:var(--teal2)">①</span> Document Ingestion
+      </div>
+      <div style="color:var(--border2);padding-left:8px;font-size:9px">↓</div>
+      <div id="step-chunk" style="display:flex;align-items:center;gap:6px;opacity:0.4">
+        <span style="color:var(--gold2)">②</span> Text Chunking
+      </div>
+      <div style="color:var(--border2);padding-left:8px;font-size:9px">↓</div>
+      <div id="step-embed" style="display:flex;align-items:center;gap:6px;opacity:0.4">
+        <span style="color:var(--accent2)">③</span> Embedding (Ada-3)
+      </div>
+      <div style="color:var(--border2);padding-left:8px;font-size:9px">↓</div>
+      <div id="step-index" style="display:flex;align-items:center;gap:6px;opacity:0.4">
+        <span style="color:var(--accent2)">④</span> FAISS Indexing
+      </div>
+      <div style="color:var(--border2);padding-left:8px;font-size:9px">↓</div>
+      <div id="step-mmr" style="display:flex;align-items:center;gap:6px;opacity:0.4">
+        <span style="color:var(--teal2)">⑤</span> MMR Retrieval
+      </div>
+      <div style="color:var(--border2);padding-left:8px;font-size:9px">↓</div>
+      <div id="step-gen" style="display:flex;align-items:center;gap:6px;opacity:0.4">
+        <span style="color:var(--green)">⑥</span> LLM Generation
+      </div>
+    </div>
+  </div>
+
+  <!-- Suggested Queries -->
+  <div class="sidebar-section">
+    <div class="sidebar-label">💡 Sample Queries</div>
+    <button class="query-chip" onclick="useQuery(this)">
+      <span class="chip-sector">TRANSPORT</span>
+      What are the key lessons on road maintenance and community ownership?
+    </button>
+    <button class="query-chip" onclick="useQuery(this)">
+      <span class="chip-sector">AGRICULTURE</span>
+      How have digital extension tools performed in low-connectivity areas?
+    </button>
+    <button class="query-chip" onclick="useQuery(this)">
+      <span class="chip-sector">WASH</span>
+      What sequencing works best for tariff reform in water projects?
+    </button>
+    <button class="query-chip" onclick="useQuery(this)">
+      <span class="chip-sector">FCS</span>
+      What project design features predict success in fragile states?
+    </button>
+    <button class="query-chip" onclick="useQuery(this)">
+      <span class="chip-sector">CROSS-CUTTING</span>
+      What are common risks around procurement delays across sectors?
+    </button>
+  </div>
+
+  <!-- Knowledge Base -->
+  <div class="sidebar-section">
+    <div class="sidebar-label">📚 Knowledge Base</div>
+    <div class="kb-item">
+      <div class="kb-icon transport">🚗</div>
+      <div><div style="color:var(--text2)">Rural Roads ICR</div><div class="kb-meta">P123456 · Transport</div></div>
+    </div>
+    <div class="kb-item">
+      <div class="kb-icon agriculture">🌾</div>
+      <div><div style="color:var(--text2)">Digital Agriculture</div><div class="kb-meta">ITSEF · 12 Projects</div></div>
+    </div>
+    <div class="kb-item">
+      <div class="kb-icon wash">💧</div>
+      <div><div style="color:var(--text2)">Urban WASH PAD</div><div class="kb-meta">P198765 · MENA</div></div>
+    </div>
+    <div class="kb-item">
+      <div class="kb-icon education">📖</div>
+      <div><div style="color:var(--text2)">Education ISR</div><div class="kb-meta">West Africa Active</div></div>
+    </div>
+    <div class="kb-item">
+      <div class="kb-icon fcs">⚠️</div>
+      <div><div style="color:var(--text2)">FCS Synthesis</div><div class="kb-meta">45 Projects · ITSEF</div></div>
+    </div>
+
+    <!-- Upload -->
+    <div class="upload-zone" onclick="document.getElementById('file-upload').click()" style="margin-top:10px">
+      <div style="font-size:16px;margin-bottom:4px">📄</div>
+      Drop or click to upload .txt document
+    </div>
+    <input type="file" id="file-upload" accept=".txt,.md" style="display:none" onchange="uploadFile(event)" />
+  </div>
+
+  <!-- API Mode note -->
+  <div class="sidebar-section" style="margin-top:auto">
+    <div class="sidebar-label">ℹ API Mode</div>
+    <div style="font-size:11px;color:var(--text3);line-height:1.6;font-family:var(--mono)">
+      Frontend → FastAPI (port 8000) → LangChain → OpenAI.<br><br>
+      Run <span style="color:var(--accent2)">uvicorn server:app</span> in <span style="color:var(--gold2)">/backend</span> to connect.
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN CHAT -->
+<main class="main">
+  <div class="chat-area" id="chat-area">
+    <!-- Welcome screen -->
+    <div class="welcome" id="welcome-screen">
+      <div class="welcome-icon">🌐</div>
+      <h1>World Bank Sector Knowledge Agent</h1>
+      <p>A RAG-powered domain agent that retrieves operational insights, lessons learned, and risk patterns from sector documents — simulating the ITSEF knowledge agent use case.</p>
+      <div class="pipeline-steps">
+        <span class="pipeline-step">LangChain</span>
+        <span class="pipeline-arrow">→</span>
+        <span class="pipeline-step">FAISS Vector DB</span>
+        <span class="pipeline-arrow">→</span>
+        <span class="pipeline-step">MMR Retrieval</span>
+        <span class="pipeline-arrow">→</span>
+        <span class="pipeline-step">GPT-4o-mini</span>
+        <span class="pipeline-arrow">→</span>
+        <span class="pipeline-step">Grounded Insights</span>
+      </div>
+      <p style="color:var(--text3);font-size:12px;font-family:var(--mono)">Configure API key → Initialize → Query the knowledge base</p>
+    </div>
+  </div>
+
+  <!-- Input bar -->
+  <div class="input-bar">
+    <div class="input-row">
+      <div class="input-wrap">
+        <textarea id="query-input" rows="1" placeholder="Ask about sector lessons, risks, operational insights…" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+      </div>
+      <button class="send-btn" id="send-btn" onclick="sendQuery()" disabled title="Send query">
+        ➤
+      </button>
+    </div>
+    <div class="input-hint">⏎ Send · Shift+⏎ New line · Initialize agent before querying</div>
+  </div>
+</main>
+
+<div id="toast"></div>
+
+<script>
+const API_BASE = 'http://localhost:8000';
+let agentReady = false;
+let isLoading = false;
+
+// ── Utility ────────────────────────────────────────────────────────────────
+function showToast(msg, type = 'info') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `show ${type}`;
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.className = '', 3200);
+}
+
+function setStatus(state) {
+  const dot = document.getElementById('status-dot');
+  const label = document.getElementById('status-label');
+  const states = {
+    not_init: ['', 'NOT INITIALIZED'],
+    loading: ['loading', 'INITIALIZING…'],
+    ready: ['ready', 'AGENT READY'],
+    querying: ['loading', 'RETRIEVING…'],
+  };
+  const [cls, text] = states[state] || ['', state];
+  dot.className = `status-dot ${cls}`;
+  label.textContent = text;
+}
+
+function activatePipelineSteps() {
+  const steps = ['step-ingest','step-chunk','step-embed','step-index','step-mmr','step-gen'];
+  steps.forEach((id, i) => {
+    setTimeout(() => {
+      document.getElementById(id).style.opacity = '1';
+      document.getElementById(id).style.transition = 'opacity 0.4s';
+    }, i * 300);
+  });
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+async function initAgent() {
+  const key = document.getElementById('api-key').value.trim();
+  if (!key) { showToast('Enter your OpenAI API key', 'error'); return; }
+
+  const btn = document.getElementById('init-btn');
+  btn.disabled = true;
+  btn.textContent = 'Initializing…';
+  setStatus('loading');
+
+  try {
+    const res = await fetch(`${API_BASE}/init`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        openai_api_key: key,
+        llm_model: document.getElementById('llm-model').value,
+        chunk_size: parseInt(document.getElementById('chunk-size').value),
+        retriever_k: parseInt(document.getElementById('retriever-k').value),
+      }),
+    });
+    if (!res.ok) throw new Error(await res.text());
+    const data = await res.json();
+    agentReady = true;
+    setStatus('ready');
+    document.getElementById('send-btn').disabled = false;
+    activatePipelineSteps();
+    showToast('Agent ready — knowledge base loaded ✓', 'success');
+    btn.textContent = '✓ Initialized';
+  } catch (err) {
+    setStatus('not_init');
+    showToast(`Init failed: ${err.message}`, 'error');
+    btn.disabled = false;
+    btn.textContent = 'Initialize Agent';
+  }
+}
+
+// ── Query ──────────────────────────────────────────────────────────────────
+function useQuery(el) {
+  const q = el.innerText.replace(/^[A-Z\s]+\n/, '').trim();
+  document.getElementById('query-input').value = q;
+  if (agentReady) sendQuery();
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    if (agentReady && !isLoading) sendQuery();
+  }
+}
+
+async function sendQuery() {
+  const input = document.getElementById('query-input');
+  const question = input.value.trim();
+  if (!question || isLoading) return;
+
+  isLoading = true;
+  input.value = '';
+  input.style.height = 'auto';
+  document.getElementById('send-btn').disabled = true;
+  document.getElementById('welcome-screen')?.remove();
+
+  appendMessage('user', question);
+  const thinkingEl = appendThinking();
+  setStatus('querying');
+
+  try {
+    const res = await fetch(`${API_BASE}/query`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question }),
+    });
+    if (!res.ok) throw new Error(await res.text());
+    const data = await res.json();
+    thinkingEl.remove();
+    appendAgentMessage(data.answer, data.sources || []);
+    setStatus('ready');
+  } catch (err) {
+    thinkingEl.remove();
+    appendAgentMessage(`⚠ Error: ${err.message}`, []);
+    setStatus('ready');
+    showToast('Query failed', 'error');
+  } finally {
+    isLoading = false;
+    document.getElementById('send-btn').disabled = false;
+    input.focus();
+  }
+}
+
+// ── DOM helpers ────────────────────────────────────────────────────────────
+function appendMessage(role, text) {
+  const chat = document.getElementById('chat-area');
+  const div = document.createElement('div');
+  div.className = `message ${role === 'user' ? 'user' : 'system'}`;
+  div.innerHTML = `
+    <div class="avatar ${role === 'user' ? 'user' : 'agent'}">${role === 'user' ? '👤' : '🌐'}</div>
+    <div class="bubble">${escapeHtml(text)}</div>
+  `;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+  return div;
+}
+
+function appendAgentMessage(answer, sources) {
+  const chat = document.getElementById('chat-area');
+  const div = document.createElement('div');
+  div.className = 'message system';
+
+  let sourcesHtml = '';
+  if (sources.length) {
+    const cards = sources.slice(0, 4).map(s => `
+      <div class="source-card">
+        <div class="source-file">📄 ${s.source.split('/').pop()} · p.${s.page}</div>
+        <div class="source-snippet">${escapeHtml(s.snippet)}</div>
+      </div>
+    `).join('');
+    sourcesHtml = `<div class="sources">
+      <div class="sources-label">Retrieved Sources (${sources.length})</div>
+      ${cards}
+    </div>`;
+  }
+
+  div.innerHTML = `
+    <div class="avatar agent">🌐</div>
+    <div class="bubble">
+      <div style="white-space:pre-wrap;word-wrap:break-word">${escapeHtml(answer)}</div>
+      ${sourcesHtml}
+    </div>
+  `;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function appendThinking() {
+  const chat = document.getElementById('chat-area');
+  const div = document.createElement('div');
+  div.className = 'message system';
+  div.innerHTML = `
+    <div class="avatar agent">🌐</div>
+    <div class="thinking">
+      <div class="thinking-dots"><span></span><span></span><span></span></div>
+      <span style="font-size:11px">Retrieving from knowledge base…</span>
+    </div>
+  `;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+  return div;
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+// ── Reset ──────────────────────────────────────────────────────────────────
+async function resetConversation() {
+  try {
+    await fetch(`${API_BASE}/reset`, { method: 'POST' });
+    document.getElementById('chat-area').innerHTML = '';
+    showToast('Conversation reset', 'success');
+  } catch {
+    showToast('Reset failed (is server running?)', 'error');
+  }
+}
+
+// ── Upload ─────────────────────────────────────────────────────────────────
+async function uploadFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const form = new FormData();
+  form.append('file', file);
+  try {
+    const res = await fetch(`${API_BASE}/upload`, { method: 'POST', body: form });
+    const data = await res.json();
+    showToast(`Uploaded ${file.name} → ${data.chunks} chunks`, 'success');
+  } catch (err) {
+    showToast(`Upload failed: ${err.message}`, 'error');
+  }
+  event.target.value = '';
+}
+</script>
+</body>
+</html>
