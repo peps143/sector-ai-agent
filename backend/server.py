@@ -27,7 +27,17 @@ app.add_middleware(
 
 # ── Agent singleton ───────────────────────────────────────────────────────────
 _agent: SectorAgent | None = None
+import asyncio
 
+@app.on_event("startup")
+async def startup_event():
+    global _agent
+    api_key = os.getenv("OPENAI_API_KEY", "")
+    if api_key:
+        config = AgentConfig(openai_api_key=api_key)
+        _agent = SectorAgent(config)
+        _agent.initialize()
+        print("[INFO] Agent auto-initialized on startup")
 
 def get_agent() -> SectorAgent:
     global _agent
