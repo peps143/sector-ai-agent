@@ -663,6 +663,22 @@
 
 <script>
 const API_BASE = 'https://sector-ai-agent.onrender.com';
+ // Auto-initialize on page load
+window.addEventListener('load', () => setTimeout(initAgentAuto, 1000));
+
+async function initAgentAuto() {
+  try {
+    const res = await fetch(`${API_BASE}/health`);
+    const data = await res.json();
+    if (data.agent_ready) {
+      agentReady = true;
+      setStatus('ready');
+      document.getElementById('send-btn').disabled = false;
+      activatePipelineSteps();
+      document.getElementById('welcome-screen') && null;
+    }
+  } catch(e) {}
+}
 let agentReady = false;
 let isLoading = false;
 
