@@ -1,22 +1,10 @@
-# Sector AI Agent — Python dependencies
-# Install with: pip install -r requirements.txt
-
-# LangChain ecosystem
 langchain==0.3.25
 langchain-community==0.3.23
 langchain-openai==0.3.16
-
-# Vector store
-faiss-cpu==1.9.0
-
-# PDF support
+faiss-cpu==1.14.2
 pypdf==5.4.0
-
-# API server
 fastapi==0.115.12
 uvicorn[standard]==0.34.2
 python-multipart==0.0.20
-
-# Utilities
 pydantic==2.11.3
 python-dotenv==1.1.0
