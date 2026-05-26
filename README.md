@@ -75,7 +75,7 @@ The agent comes seeded with five synthetic but realistic documents modeled on re
 
 ## Try It
 
-🌐 **Live Demo:** [sector-ai-agent on GitHub Pages](https://peps143.github.io/sector-ai-agent/frontend/index.html)
+🌐 **Live Demo:** [https://peps143.github.io/sector-ai-agent/frontend/index.html)
 
  Just type a question.
 
