@@ -6,13 +6,13 @@
 
 ## Why I Built This
 
-One thing I've noticed working in international development is how much knowledge gets buried — in project completion reports, sector notes, implementation reviews — documents that exist but are rarely surfaced when they're actually needed.
+One thing I've noticed working in international development is how much knowledge gets buried in project completion reports, sector notes, implementation reviews , documents that exist but are rarely surfaced when they're actually needed.
 
 I wanted to explore what it would look like to build an AI system that could actually *read* those documents and answer questions from them in real time. Not just search keywords, but understand context, retrieve relevant passages, and synthesize insights the way a knowledgeable colleague would.
 
-This project is my attempt at that. It simulates the kind of knowledge agent the World Bank's ITSEF (Independent Evaluation Group) could use to help teams learn from past operations without having to manually dig through hundreds of reports.
+This project simulates the kind of knowledge agent the World Bank's ITSEF (Independent Evaluation Group) could use to help teams learn from past operations without having to manually dig through hundreds of reports.
 
-After getting the agent working, I took it a step further — I wired real-time observability into it so every query gets logged, scored, and visualized on a live monitoring dashboard. That turned it from a prototype into something closer to a production system.
+After getting the agent working, I took it a step further. I wired real-time observability into it so every query gets logged, scored, and visualized on a live monitoring dashboard. That turned it from a prototype into something closer to a production system.
 
 ---
 
@@ -25,7 +25,7 @@ You can ask it questions like:
 - *"What lessons exist on community ownership in rural roads?"*
 - *"What monitoring approaches work best in conflict-affected states?"*
 
-It searches a knowledge base of sector documents, retrieves the most relevant passages, and generates a grounded answer — with citations showing exactly which documents it pulled from. Every query is automatically logged to a Supabase database with quality scores and latency metrics, which feed into a live performance dashboard.
+It searches a knowledge base of sector documents, retrieves the most relevant passages, and generates a grounded answer, with citations showing exactly which documents it pulled from. Every query is automatically logged to a Supabase database with quality scores and latency metrics, which feed into a live performance dashboard.
 
 ---
 
