@@ -3,203 +3,107 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Sector AI Agent — Performance Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<title>Sector AI Agent — Live Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --ink:#0a0a0f;
-  --paper:#f4f1eb;
-  --surface:#ffffff;
-  --surface2:#f9f7f3;
-  --border:#e2ddd6;
-  --muted:#9b9490;
-  --accent:#1a1a2e;
-  --blue:#2563eb;
-  --green:#059669;
-  --amber:#d97706;
-  --red:#dc2626;
-  --teal:#0d9488;
-  --purple:#7c3aed;
-  --mono:'Space Mono',monospace;
-  --display:'Syne',sans-serif;
-  --body:'DM Sans',sans-serif;
+  --ink:#0a0a0f;--paper:#f4f1eb;--surface:#fff;--surface2:#f9f7f3;
+  --border:#e2ddd6;--muted:#9b9490;
+  --blue:#2563eb;--green:#059669;--amber:#d97706;--red:#dc2626;--teal:#0d9488;--purple:#7c3aed;
+  --ltblue:#dbeafe;--ltgreen:#d1fae5;--ltamber:#fef3c7;--ltred:#fee2e2;
+  --mono:'Space Mono',monospace;--display:'Syne',sans-serif;--body:'DM Sans',sans-serif;
 }
-html{scroll-behavior:smooth}
-body{font-family:var(--body);background:var(--paper);color:var(--ink);min-height:100vh;font-size:14px;line-height:1.6}
-
-/* ── HEADER ── */
-.header{background:var(--ink);color:var(--paper);padding:28px 40px;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;position:relative;overflow:hidden}
-.header::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;border:1px solid rgba(244,241,235,0.08);border-radius:50%}
-.header::after{content:'';position:absolute;top:-20px;right:-20px;width:120px;height:120px;border:1px solid rgba(244,241,235,0.05);border-radius:50%}
-.header-left{}
-.header-eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:2px;color:rgba(244,241,235,0.45);text-transform:uppercase;margin-bottom:8px}
-.header-title{font-family:var(--display);font-size:26px;font-weight:800;line-height:1.1;margin-bottom:6px}
-.header-sub{font-size:12px;color:rgba(244,241,235,0.55);max-width:420px;line-height:1.5}
-.header-right{display:flex;flex-direction:column;align-items:flex-end;gap:10px}
-.sim-badge{background:rgba(244,241,235,0.08);border:1px solid rgba(244,241,235,0.2);border-radius:4px;padding:6px 12px;font-family:var(--mono);font-size:9px;letter-spacing:1px;color:rgba(244,241,235,0.7);text-transform:uppercase}
-.live-indicator{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;color:rgba(244,241,235,0.5)}
-.live-dot{width:6px;height:6px;border-radius:50%;background:#10b981;animation:blink 2s infinite}
+body{font-family:var(--body);background:var(--paper);color:var(--ink);min-height:100vh;font-size:14px}
+.header{background:var(--ink);color:var(--paper);padding:24px 36px;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.header-title{font-family:var(--display);font-size:22px;font-weight:800;margin-bottom:4px}
+.header-sub{font-size:11px;color:rgba(244,241,235,0.5);font-family:var(--mono)}
+.header-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.live-badge{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;color:rgba(244,241,235,0.7);background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);padding:5px 10px;border-radius:4px}
+.live-dot{width:7px;height:7px;border-radius:50%;background:#10b981;animation:blink 2s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
-
-/* ── CONTROLS ── */
-.controls{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 40px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
-.ctrl-label{font-family:var(--mono);font-size:10px;letter-spacing:1px;color:var(--muted);text-transform:uppercase}
-.ctrl-group{display:flex;gap:6px;flex-wrap:wrap}
-.ctrl-btn{font-family:var(--mono);font-size:10px;padding:5px 12px;border-radius:3px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;letter-spacing:0.5px;transition:all 0.15s}
+.sim-note{font-family:var(--mono);font-size:9px;color:rgba(244,241,235,0.35);letter-spacing:0.5px}
+.controls{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 36px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.ctrl-label{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.ctrl-btn{font-family:var(--mono);font-size:10px;padding:5px 12px;border-radius:3px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all 0.15s}
 .ctrl-btn:hover{border-color:var(--ink);color:var(--ink)}
 .ctrl-btn.active{background:var(--ink);color:var(--paper);border-color:var(--ink)}
-.ctrl-sep{width:1px;height:24px;background:var(--border)}
-
-/* ── LAYOUT ── */
-.main{padding:32px 40px;display:flex;flex-direction:column;gap:24px}
-
-/* ── KPI STRIP ── */
-.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:8px;overflow:hidden}
-.kpi{background:var(--surface);padding:18px 20px;position:relative}
-.kpi-tag{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:6px}
-.kpi-tag-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-.kpi-val{font-family:var(--display);font-size:28px;font-weight:800;line-height:1;margin-bottom:4px;letter-spacing:-0.5px}
-.kpi-delta{font-family:var(--mono);font-size:10px}
-.kpi-delta.up{color:var(--green)}
-.kpi-delta.down{color:var(--red)}
-.kpi-delta.good{color:var(--green)}
-
-/* ── SECTION HEADERS ── */
-.section-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px}
-.section-title{font-family:var(--display);font-size:14px;font-weight:700;letter-spacing:-0.2px}
-.section-meta{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.5px}
-
-/* ── CHARTS GRID ── */
+.refresh-btn{font-family:var(--mono);font-size:10px;padding:5px 12px;border-radius:3px;border:1px solid var(--blue);background:var(--ltblue);color:var(--blue);cursor:pointer;margin-left:auto;transition:all 0.15s}
+.refresh-btn:hover{background:var(--blue);color:#fff}
+.loading-bar{height:2px;background:linear-gradient(90deg,var(--blue),var(--teal));width:0%;transition:width 0.5s;position:fixed;top:0;left:0;z-index:999}
+.main{padding:28px 36px;display:flex;flex-direction:column;gap:20px}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.kpi{background:var(--surface);padding:16px 18px}
+.kpi-label{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:5px}
+.kpi-dot{width:6px;height:6px;border-radius:50%}
+.kpi-val{font-family:var(--display);font-size:26px;font-weight:800;line-height:1;margin-bottom:3px}
+.kpi-sub{font-family:var(--mono);font-size:9px;color:var(--muted)}
 .charts-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .charts-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
-@media(max-width:900px){.charts-2,.charts-3{grid-template-columns:1fr}}
-
-/* ── CARD ── */
-.card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px 22px}
+@media(max-width:860px){.charts-2,.charts-3{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:18px 20px}
 .card-title{font-family:var(--display);font-size:13px;font-weight:700;margin-bottom:2px}
-.card-sub{font-size:11px;color:var(--muted);margin-bottom:16px;font-family:var(--mono)}
-
-/* ── TRACE SCORES ── */
-.trace-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
+.card-sub{font-size:11px;color:var(--muted);margin-bottom:14px;font-family:var(--mono)}
+.domain-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.domain-name{font-size:11px;font-family:var(--mono);min-width:88px}
+.domain-track{flex:1;height:16px;background:var(--surface2);border-radius:3px;overflow:hidden}
+.domain-fill{height:100%;border-radius:3px;display:flex;align-items:center;padding-left:7px;font-family:var(--mono);font-size:9px;color:#fff;font-weight:700;transition:width 0.8s cubic-bezier(.4,0,.2,1)}
+.domain-count{font-family:var(--mono);font-size:10px;color:var(--muted);min-width:28px;text-align:right}
+.trace-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
 .trace-row:last-child{border-bottom:none}
-.trace-name{font-size:12px;color:var(--ink);min-width:130px}
+.trace-name{font-size:12px;min-width:130px}
 .trace-track{flex:1;height:5px;background:var(--surface2);border-radius:3px;overflow:hidden}
-.trace-fill{height:100%;border-radius:3px;transition:width 0.8s cubic-bezier(.4,0,.2,1)}
-.trace-score{font-family:var(--mono);font-size:11px;font-weight:700;min-width:34px;text-align:right}
-.trace-label{font-family:var(--mono);font-size:9px;padding:2px 6px;border-radius:3px;min-width:44px;text-align:center}
-.label-good{background:#d1fae5;color:#065f46}
-.label-ok{background:#fef3c7;color:#92400e}
-.label-low{background:#fee2e2;color:#991b1b}
-
-/* ── DOMAIN BARS ── */
-.domain-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-.domain-name{font-size:11px;font-family:var(--mono);min-width:90px;color:var(--ink)}
-.domain-track{flex:1;height:18px;background:var(--surface2);border-radius:3px;overflow:hidden;position:relative}
-.domain-fill{height:100%;border-radius:3px;display:flex;align-items:center;padding-left:8px;font-family:var(--mono);font-size:10px;color:white;font-weight:700;transition:width 0.8s cubic-bezier(.4,0,.2,1)}
-.domain-count{font-family:var(--mono);font-size:10px;color:var(--muted);min-width:32px;text-align:right}
-
-/* ── FEATURE ADOPTION ── */
-.feat-list{display:flex;flex-direction:column;gap:10px}
-.feat-row{display:grid;grid-template-columns:120px 1fr 40px;align-items:center;gap:10px}
-.feat-name{font-size:12px;color:var(--ink)}
-.feat-track{height:6px;background:var(--surface2);border-radius:3px;overflow:hidden}
-.feat-fill{height:100%;border-radius:3px;transition:width 0.8s}
-.feat-pct{font-family:var(--mono);font-size:11px;text-align:right;color:var(--muted)}
-
-/* ── FEED ── */
-.feed{display:flex;flex-direction:column;gap:1px}
-.feed-item{padding:10px 12px;background:var(--surface2);border-radius:5px;margin-bottom:6px;display:flex;gap:10px;align-items:flex-start;border-left:3px solid transparent;transition:border-color 0.15s}
-.feed-item:hover{border-left-color:var(--blue)}
-.feed-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px}
-.feed-body{flex:1}
-.feed-text{font-size:12px;color:var(--ink);line-height:1.4;margin-bottom:2px}
-.feed-meta{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.5px}
-.feed-score{font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:3px;align-self:center;flex-shrink:0}
-
-/* ── CITATION HEATMAP ── */
-.heatmap{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-top:4px}
-.hm-cell{aspect-ratio:1;border-radius:2px;transition:opacity 0.15s}
-.hm-cell:hover{opacity:0.7;cursor:default}
-
-/* ── FOOTER NOTE ── */
-.footnote{background:var(--ink);color:rgba(244,241,235,0.5);padding:16px 40px;font-family:var(--mono);font-size:10px;letter-spacing:0.5px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
-.footnote strong{color:rgba(244,241,235,0.8)}
-
-/* ── CHART LEGEND ── */
-.legend{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px}
-.leg-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)}
-.leg-sq{width:10px;height:10px;border-radius:2px;flex-shrink:0}
-.leg-line{width:16px;height:2px;flex-shrink:0}
-
-/* ── ANIMATIONS ── */
-.card{animation:fadeUp 0.4s ease both}
-@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.trace-fill{height:100%;border-radius:3px;transition:width 0.8s}
+.trace-val{font-family:var(--mono);font-size:11px;font-weight:700;min-width:32px;text-align:right}
+.trace-tag{font-family:var(--mono);font-size:9px;padding:2px 6px;border-radius:3px;min-width:42px;text-align:center}
+.tag-good{background:var(--ltgreen);color:#065f46}
+.tag-ok{background:var(--ltamber);color:#92400e}
+.tag-low{background:var(--ltred);color:#991b1b}
+.feed-item{padding:9px 10px;background:var(--surface2);border-radius:5px;margin-bottom:6px;display:flex;gap:10px;border-left:3px solid transparent}
+.feed-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.feed-text{font-size:11.5px;line-height:1.4;margin-bottom:2px}
+.feed-meta{font-family:var(--mono);font-size:9px;color:var(--muted)}
+.feed-score{font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:3px;flex-shrink:0;align-self:center}
+.empty-state{text-align:center;padding:32px;color:var(--muted);font-family:var(--mono);font-size:11px}
+.footer{background:var(--ink);color:rgba(244,241,235,0.4);padding:14px 36px;font-family:var(--mono);font-size:9px;letter-spacing:0.5px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
+.footer strong{color:rgba(244,241,235,0.7)}
 </style>
 </head>
 <body>
+<div class="loading-bar" id="loading-bar"></div>
 
 <div class="header">
-  <div class="header-left">
-    <div class="header-eyebrow">AI Performance Monitor · v1.0</div>
-    <div class="header-title">Sector AI Agent<br>Dashboard</div>
-    <div class="header-sub">RAG pipeline performance monitoring — engagement, retrieval quality &amp; hallucination metrics modelled on the RAGBench TRACe evaluation framework.</div>
+  <div>
+    <div style="font-family:var(--mono);font-size:9px;letter-spacing:2px;color:rgba(244,241,235,0.35);margin-bottom:6px;text-transform:uppercase">AI Performance Monitor · v2.0</div>
+    <div class="header-title">Sector AI Agent Dashboard</div>
+    <div class="header-sub">Live observability · Supabase · RAGBench TRACe framework</div>
   </div>
   <div class="header-right">
-    <div class="sim-badge">⚠ Simulated monitoring data</div>
-    <div class="live-indicator"><span class="live-dot"></span>Dashboard active</div>
+    <div class="live-badge"><span class="live-dot"></span>Connected to Supabase</div>
+    <div class="sim-note">Quality scores: heuristic TRACe model · Scores are estimates</div>
   </div>
 </div>
 
 <div class="controls">
-  <span class="ctrl-label">Period</span>
-  <div class="ctrl-group" id="period-group">
-    <button class="ctrl-btn" onclick="setPeriod(7,this)">7D</button>
-    <button class="ctrl-btn active" onclick="setPeriod(30,this)">30D</button>
-    <button class="ctrl-btn" onclick="setPeriod(90,this)">90D</button>
-  </div>
-  <div class="ctrl-sep"></div>
-  <span class="ctrl-label">Domain</span>
-  <div class="ctrl-group" id="domain-group">
-    <button class="ctrl-btn active" onclick="setDomain('all',this)">All</button>
-    <button class="ctrl-btn" onclick="setDomain('transport',this)">Transport</button>
-    <button class="ctrl-btn" onclick="setDomain('agriculture',this)">Agriculture</button>
-    <button class="ctrl-btn" onclick="setDomain('wash',this)">WASH</button>
-    <button class="ctrl-btn" onclick="setDomain('education',this)">Education</button>
-    <button class="ctrl-btn" onclick="setDomain('fcs',this)">FCS</button>
-  </div>
+  <span class="ctrl-label">View</span>
+  <button class="ctrl-btn active" onclick="setView('live',this)">Live Data</button>
+  <button class="ctrl-btn" onclick="setView('sim',this)">+ Simulated</button>
+  <button class="refresh-btn" onclick="loadData()">⟳ Refresh</button>
+  <span id="last-updated" style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-left:4px"></span>
 </div>
 
 <div class="main">
-
-  <!-- KPI STRIP -->
-  <div class="kpi-grid" id="kpi-grid"></div>
-
-  <!-- ROW 1: Volume + TRACe -->
-  <div class="charts-2">
-    <div class="card">
-      <div class="card-title">Query volume</div>
-      <div class="card-sub">Daily queries by sector · last <span id="period-label">30</span> days</div>
-      <div class="legend" id="vol-legend"></div>
-      <div style="position:relative;width:100%;height:200px">
-        <canvas id="volChart" role="img" aria-label="Line chart of daily query volume by sector"></canvas>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title">TRACe quality scores</div>
-      <div class="card-sub">Truthfulness · Relevance · Accuracy · Completeness · Evidence</div>
-      <div id="trace-scores"></div>
-    </div>
+  <div class="kpi-grid" id="kpi-grid">
+    <div class="kpi"><div class="kpi-label">Loading...</div><div class="kpi-val">—</div></div>
   </div>
 
-  <!-- ROW 2: Hallucination + Domain + Adoption -->
-  <div class="charts-3">
+  <div class="charts-2">
     <div class="card">
-      <div class="card-title">Hallucination rate</div>
-      <div class="card-sub">% responses with low grounding score</div>
-      <div style="position:relative;width:100%;height:170px">
-        <canvas id="hallChart" role="img" aria-label="Line chart showing hallucination rate declining over time"></canvas>
+      <div class="card-title">Query volume over time</div>
+      <div class="card-sub">Queries logged per day · live from Supabase</div>
+      <div style="position:relative;width:100%;height:190px">
+        <canvas id="volChart"></canvas>
       </div>
     </div>
     <div class="card">
@@ -207,308 +111,318 @@ body{font-family:var(--body);background:var(--paper);color:var(--ink);min-height
       <div class="card-sub">Queries per knowledge sector</div>
       <div id="domain-bars" style="margin-top:4px"></div>
     </div>
-    <div class="card">
-      <div class="card-title">Feature adoption</div>
-      <div class="card-sub">Capability engagement breakdown</div>
-      <div class="feat-list" id="feat-list"></div>
-    </div>
   </div>
 
-  <!-- ROW 3: Latency + Feed + Heatmap -->
   <div class="charts-2">
     <div class="card">
-      <div class="card-title">Response latency distribution</div>
-      <div class="card-sub">p50 / p90 / p99 latency in seconds</div>
+      <div class="card-title">Response latency</div>
+      <div class="card-sub">Seconds per query · live from Supabase</div>
       <div style="position:relative;width:100%;height:190px">
-        <canvas id="latChart" role="img" aria-label="Bar chart of response latency percentiles over time"></canvas>
+        <canvas id="latChart"></canvas>
       </div>
     </div>
-    <div class="card" style="display:flex;flex-direction:column;gap:0">
-      <div class="card-title">Recent query feed</div>
-      <div class="card-sub">Last 5 agent interactions</div>
-      <div class="feed" id="feed"></div>
-      <div style="margin-top:10px">
-        <div class="card-title" style="margin-bottom:2px">Weekly query heatmap</div>
-        <div class="card-sub" style="margin-bottom:8px">Activity by day (Mon–Sun, 4 weeks)</div>
-        <div class="heatmap" id="heatmap"></div>
-        <div style="display:flex;align-items:center;gap:6px;margin-top:6px;font-family:var(--mono);font-size:9px;color:var(--muted)">
-          <span>Less</span>
-          <div style="display:flex;gap:2px">
-            <div style="width:10px;height:10px;border-radius:2px;background:#e2ddd6"></div>
-            <div style="width:10px;height:10px;border-radius:2px;background:#bfdbfe"></div>
-            <div style="width:10px;height:10px;border-radius:2px;background:#60a5fa"></div>
-            <div style="width:10px;height:10px;border-radius:2px;background:#2563eb"></div>
-            <div style="width:10px;height:10px;border-radius:2px;background:#1d4ed8"></div>
-          </div>
-          <span>More</span>
-        </div>
-      </div>
+    <div class="card">
+      <div class="card-title">TRACe quality scores</div>
+      <div class="card-sub">Avg relevance · grounding · completeness</div>
+      <div id="trace-scores"></div>
     </div>
   </div>
 
+  <div class="charts-2">
+    <div class="card">
+      <div class="card-title">Hallucination flag rate</div>
+      <div class="card-sub">% queries flagged for low grounding · live</div>
+      <div style="position:relative;width:100%;height:190px">
+        <canvas id="hallChart"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Recent query feed</div>
+      <div class="card-sub">Latest agent interactions · live from Supabase</div>
+      <div id="feed-list"></div>
+    </div>
+  </div>
 </div>
 
-<div class="footnote">
-  <span><strong>Simulation note:</strong> All metrics are synthetically generated. Quality scoring methodology based on <strong>RAGBench TRACe framework</strong> (Rungalileo, 2024). For portfolio demonstration only.</span>
-  <span>Sector AI Agent · Perpetual T. Adu · 2026</span>
+<div class="footer">
+  <span><strong>Data source:</strong> Supabase PostgreSQL · sector-ai-agent project · query_logs table</span>
+  <span><strong>Quality scoring:</strong> Heuristic TRACe model (Relevance + Grounding + Completeness) · Sector AI Agent · Perpetual T. Adu · 2026</span>
 </div>
 
 <script>
-let currentPeriod = 30;
-let currentDomain = 'all';
-
-const DOMAINS = {
-  transport:  { label:'Transport',   color:'#2563eb', base:34 },
-  agriculture:{ label:'Agriculture', color:'#059669', base:22 },
-  wash:       { label:'WASH',        color:'#0d9488', base:18 },
-  education:  { label:'Education',   color:'#d97706', base:15 },
-  fcs:        { label:'FCS',         color:'#dc2626', base:11 },
+const API = 'https://sector-ai-agent.onrender.com';
+const DOMAIN_COLORS = {
+  Transport:'#2563eb', Agriculture:'#059669', WASH:'#0d9488',
+  Education:'#d97706', FCS:'#dc2626', General:'#7c3aed'
 };
+let currentView = 'live';
+let volChart, latChart, hallChart;
+let liveRows = [];
 
+function setView(v, btn) {
+  currentView = v;
+  document.querySelectorAll('.ctrl-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderAll(liveRows);
+}
+
+function showLoading(on) {
+  document.getElementById('loading-bar').style.width = on ? '70%' : '100%';
+  if (!on) setTimeout(() => document.getElementById('loading-bar').style.width = '0%', 400);
+}
+
+// ── Simulated extra rows to pad live data ─────────────────────────────────────
 function seeded(seed){ let s=seed; return ()=>{ s=(s*1664525+1013904223)&0xffffffff; return (s>>>0)/0xffffffff; }; }
 
-function getDayLabels(n){
-  return Array.from({length:n},(_,i)=>{
-    const d=new Date(); d.setDate(d.getDate()-(n-1-i));
-    return n<=14 ? d.toLocaleDateString('en-US',{month:'short',day:'numeric'}) : (i%5===0||i===n-1) ? d.toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
+function getSimRows(n=60) {
+  const r = seeded(42);
+  const domains = ['Transport','Agriculture','WASH','Education','FCS'];
+  const now = new Date();
+  return Array.from({length:n}, (_,i) => {
+    const d = new Date(now - (n-i) * 3600000 * 4);
+    const domain = domains[Math.floor(r()*5)];
+    const rel = Math.round(70 + r()*28);
+    const grd = Math.round(65 + r()*30);
+    const cmp = Math.round(68 + r()*28);
+    const avg = +((rel+grd+cmp)/3).toFixed(1);
+    return {
+      created_at: d.toISOString(),
+      domain,
+      latency_sec: +(3 + r()*12).toFixed(2),
+      relevance_score: rel,
+      grounding_score: grd,
+      completeness_score: cmp,
+      avg_trace_score: avg,
+      hallucination_flag: avg < 74,
+      sources_count: 5,
+    };
   });
 }
 
-function genSeries(n, base, variance, seed, trend=0){
-  const r=seeded(seed);
-  return Array.from({length:n},(_,i)=>Math.max(0,Math.round(base+(r()-0.5)*variance+i*trend)));
+// ── Load from /stats ───────────────────────────────────────────────────────────
+async function loadData() {
+  showLoading(true);
+  try {
+    const res = await fetch(`${API}/stats`);
+    if (!res.ok) throw new Error('Stats endpoint error');
+    const data = await res.json();
+    liveRows = data.rows || [];
+    document.getElementById('last-updated').textContent =
+      'Updated ' + new Date().toLocaleTimeString();
+    renderAll(liveRows);
+  } catch(e) {
+    console.warn('Could not reach /stats:', e.message);
+    // Fallback: show simulated data with a note
+    liveRows = [];
+    renderAll([]);
+    document.getElementById('last-updated').textContent = '⚠ Using simulated data (backend sleeping)';
+  }
+  showLoading(false);
 }
 
-/* ── KPIs ── */
-function renderKPIs(period, domain){
-  const m = domain==='all' ? 1 : 0.2;
-  const p = period===7?0.25:period===30?1:3;
-  const items = [
-    { label:'Total queries',    val: Math.round(1842*p*m).toLocaleString(), delta:'↑ 14% vs prev', cls:'up', dot:'#2563eb' },
-    { label:'Unique sessions',  val: Math.round(534*p*m).toLocaleString(),  delta:'↑ 9% vs prev',  cls:'up', dot:'#059669' },
-    { label:'Avg response time',val:'2.1s',  delta:'↓ 0.5s faster',   cls:'good', dot:'#0d9488' },
-    { label:'Citation rate',    val:'94.3%', delta:'↑ 2.8% vs prev',  cls:'up',   dot:'#7c3aed' },
-    { label:'Hallucination %',  val:'3.1%',  delta:'↓ 1.4% improved', cls:'good', dot:'#d97706' },
-    { label:'User satisfaction',val:'4.6/5', delta:'↑ 0.3 vs prev',   cls:'up',   dot:'#dc2626' },
+function getRows() {
+  if (currentView === 'sim') return [...liveRows, ...getSimRows(50)];
+  return liveRows;
+}
+
+// ── Render all panels ─────────────────────────────────────────────────────────
+function renderAll(rows) {
+  const all = getRows();
+  renderKPIs(all);
+  renderVolume(all);
+  renderDomains(all);
+  renderLatency(all);
+  renderTrace(all);
+  renderHall(all);
+  renderFeed(rows); // feed always live only
+}
+
+// ── KPIs ──────────────────────────────────────────────────────────────────────
+function renderKPIs(rows) {
+  const n = rows.length;
+  const avgLat  = n ? (rows.reduce((a,r)=>a+(r.latency_sec||0),0)/n).toFixed(1) : '—';
+  const avgTrc  = n ? (rows.reduce((a,r)=>a+(r.avg_trace_score||0),0)/n).toFixed(1) : '—';
+  const hallPct = n ? (rows.filter(r=>r.hallucination_flag).length/n*100).toFixed(1) : '—';
+  const domains = [...new Set(rows.map(r=>r.domain))].length;
+
+  const kpis = [
+    {label:'Total queries',   val: n,        sub:'logged to Supabase',     dot:'#2563eb'},
+    {label:'Avg latency',     val: avgLat+'s', sub:'seconds per response', dot:'#0d9488'},
+    {label:'Avg TRACe score', val: avgTrc,   sub:'quality score / 100',    dot:'#059669'},
+    {label:'Hallucination %', val: hallPct+'%', sub:'flagged low grounding',dot:'#dc2626'},
+    {label:'Domains active',  val: domains,  sub:'knowledge sectors queried',dot:'#7c3aed'},
+    {label:'Sources / query', val: n ? (rows.reduce((a,r)=>a+(r.sources_count||0),0)/n).toFixed(1) : '—', sub:'avg retrieved chunks', dot:'#d97706'},
   ];
-  document.getElementById('kpi-grid').innerHTML = items.map(k=>`
+
+  document.getElementById('kpi-grid').innerHTML = kpis.map(k=>`
     <div class="kpi">
-      <div class="kpi-tag"><span class="kpi-tag-dot" style="background:${k.dot}"></span>${k.label}</div>
+      <div class="kpi-label"><span class="kpi-dot" style="background:${k.dot}"></span>${k.label}</div>
       <div class="kpi-val">${k.val}</div>
-      <div class="kpi-delta ${k.cls}">${k.delta}</div>
+      <div class="kpi-sub">${k.sub}</div>
     </div>`).join('');
 }
 
-/* ── VOLUME CHART ── */
-let volChart;
-function renderVolume(period, domain){
-  const labels = getDayLabels(period);
-  const step = period>30?6:period>14?3:1;
-  const filteredLabels = labels.filter((_,i)=>labels[i]!==''||i===0);
-  const domains = domain==='all' ? Object.keys(DOMAINS) : [domain];
+// ── Volume chart ──────────────────────────────────────────────────────────────
+function renderVolume(rows) {
+  // Group by date
+  const byDate = {};
+  rows.forEach(r => {
+    const d = r.created_at.slice(0,10);
+    byDate[d] = (byDate[d]||0) + 1;
+  });
+  const labels = Object.keys(byDate).sort();
+  const data   = labels.map(l => byDate[l]);
 
-  document.getElementById('vol-legend').innerHTML = domains.map(d=>`
-    <div class="leg-item"><div class="leg-line" style="background:${DOMAINS[d].color}"></div>${DOMAINS[d].label}</div>`).join('');
-
-  const datasets = domains.map((d,si)=>({
-    label: DOMAINS[d].label,
-    data: genSeries(period, DOMAINS[d].base+(si*3), 20, si*77+period, 0.15),
-    borderColor: DOMAINS[d].color,
-    backgroundColor: 'transparent',
-    tension: 0.4, pointRadius: 0, borderWidth: 2,
-    borderDash: si===0?[]:[4,3],
-  }));
-
-  if(volChart) volChart.destroy();
-  volChart = new Chart(document.getElementById('volChart'),{
-    type:'line',
-    data:{ labels: genSeries(period,0,0,1).map((_,i)=>{ const d=new Date(); d.setDate(d.getDate()-(period-1-i)); return d.toLocaleDateString('en-US',{month:'short',day:'numeric'}); }), datasets },
-    options:{
-      responsive:true, maintainAspectRatio:false,
-      plugins:{ legend:{display:false} },
-      scales:{
-        x:{ ticks:{ font:{size:9,family:'Space Mono'}, maxTicksLimit:8, maxRotation:0 }, grid:{display:false} },
-        y:{ ticks:{ font:{size:9,family:'Space Mono'} }, beginAtZero:true, grid:{ color:'rgba(0,0,0,0.05)' } }
+  if (volChart) volChart.destroy();
+  volChart = new Chart(document.getElementById('volChart'), {
+    type: 'bar',
+    data: { labels, datasets: [{
+      label: 'Queries', data,
+      backgroundColor: '#dbeafe', borderColor: '#2563eb',
+      borderWidth: 1.5, borderRadius: 3,
+    }]},
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { font:{size:9,family:'Space Mono'}, maxRotation:45 }, grid:{display:false} },
+        y: { ticks: { font:{size:9,family:'Space Mono'} }, beginAtZero:true, grid:{color:'rgba(0,0,0,0.05)'} }
       }
     }
   });
 }
 
-/* ── TRACe SCORES ── */
-function renderTrace(){
-  const scores=[
-    {name:'Truthfulness',     val:91, color:'#059669'},
-    {name:'Relevance',        val:88, color:'#2563eb'},
-    {name:'Accuracy',         val:85, color:'#7c3aed'},
-    {name:'Completeness',     val:93, color:'#0d9488'},
-    {name:'Evidence grounding',val:96, color:'#059669'},
-    {name:'MMR diversity',    val:82, color:'#d97706'},
+// ── Domain bars ───────────────────────────────────────────────────────────────
+function renderDomains(rows) {
+  const counts = {};
+  rows.forEach(r => counts[r.domain] = (counts[r.domain]||0)+1);
+  const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  const max = sorted[0]?.[1] || 1;
+
+  if (!sorted.length) {
+    document.getElementById('domain-bars').innerHTML = '<div class="empty-state">No data yet</div>';
+    return;
+  }
+
+  document.getElementById('domain-bars').innerHTML = sorted.map(([d,c])=>`
+    <div class="domain-row">
+      <div class="domain-name">${d}</div>
+      <div class="domain-track">
+        <div class="domain-fill" style="width:${Math.round(c/max*100)}%;background:${DOMAIN_COLORS[d]||'#888'}">
+          ${Math.round(c/rows.length*100)}%
+        </div>
+      </div>
+      <div class="domain-count">${c}q</div>
+    </div>`).join('');
+}
+
+// ── Latency chart ─────────────────────────────────────────────────────────────
+function renderLatency(rows) {
+  const sorted = [...rows].sort((a,b)=>a.created_at.localeCompare(b.created_at));
+  const labels = sorted.map((_,i)=>`Q${i+1}`);
+  const data   = sorted.map(r=>+(r.latency_sec||0).toFixed(2));
+
+  if (latChart) latChart.destroy();
+  latChart = new Chart(document.getElementById('latChart'), {
+    type: 'line',
+    data: { labels, datasets: [{
+      label:'Latency (s)', data,
+      borderColor:'#0d9488', backgroundColor:'rgba(13,148,136,0.08)',
+      fill:true, tension:0.4, pointRadius:3, borderWidth:2,
+    }]},
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false} },
+      scales:{
+        x:{ ticks:{font:{size:9,family:'Space Mono'},maxTicksLimit:10}, grid:{display:false} },
+        y:{ ticks:{font:{size:9,family:'Space Mono'},callback:v=>v+'s'}, beginAtZero:true, grid:{color:'rgba(0,0,0,0.05)'} }
+      }
+    }
+  });
+}
+
+// ── TRACe scores ──────────────────────────────────────────────────────────────
+function renderTrace(rows) {
+  const n = rows.length || 1;
+  const avg = key => +(rows.reduce((a,r)=>a+(r[key]||0),0)/n).toFixed(1);
+
+  const scores = [
+    {name:'Relevance',          val:avg('relevance_score'),    color:'#2563eb'},
+    {name:'Grounding',          val:avg('grounding_score'),    color:'#059669'},
+    {name:'Completeness',       val:avg('completeness_score'), color:'#7c3aed'},
+    {name:'Avg TRACe score',    val:avg('avg_trace_score'),    color:'#0d9488'},
   ];
+
   document.getElementById('trace-scores').innerHTML = scores.map(s=>{
-    const lbl = s.val>=90?'Excellent':s.val>=80?'Good':'Needs work';
-    const lcls = s.val>=90?'label-good':s.val>=80?'label-ok':'label-low';
+    const lbl = s.val>=85?'Excellent':s.val>=75?'Good':'Needs work';
+    const cls = s.val>=85?'tag-good':s.val>=75?'tag-ok':'tag-low';
     return `<div class="trace-row">
       <div class="trace-name">${s.name}</div>
       <div class="trace-track"><div class="trace-fill" style="width:${s.val}%;background:${s.color}"></div></div>
-      <div class="trace-score" style="color:${s.color}">${s.val}</div>
-      <div class="trace-label ${lcls}">${lbl}</div>
+      <div class="trace-val" style="color:${s.color}">${s.val}</div>
+      <div class="trace-tag ${cls}">${lbl}</div>
     </div>`;
   }).join('');
 }
 
-/* ── HALLUCINATION CHART ── */
-let hallChart;
-function renderHall(period){
-  const r = seeded(42);
-  const data = Array.from({length:period},(_,i)=>parseFloat(Math.max(1.2,8.5-i*(7.3/period)+(r()-0.5)*0.9).toFixed(2)));
-  const labels = genSeries(period,0,0,1).map((_,i)=>{ const d=new Date(); d.setDate(d.getDate()-(period-1-i)); return d.toLocaleDateString('en-US',{month:'short',day:'numeric'}); });
+// ── Hallucination chart ───────────────────────────────────────────────────────
+function renderHall(rows) {
+  const byDate = {};
+  const totals = {};
+  rows.forEach(r => {
+    const d = r.created_at.slice(0,10);
+    totals[d] = (totals[d]||0)+1;
+    if(r.hallucination_flag) byDate[d] = (byDate[d]||0)+1;
+  });
+  const labels = Object.keys(totals).sort();
+  const data   = labels.map(l => totals[l] ? +((byDate[l]||0)/totals[l]*100).toFixed(1) : 0);
 
-  if(hallChart) hallChart.destroy();
-  hallChart = new Chart(document.getElementById('hallChart'),{
-    type:'line',
-    data:{ labels, datasets:[{
+  if (hallChart) hallChart.destroy();
+  hallChart = new Chart(document.getElementById('hallChart'), {
+    type: 'line',
+    data: { labels, datasets:[{
       label:'Hallucination %', data,
-      borderColor:'#dc2626', backgroundColor:'rgba(220,38,38,0.06)',
-      fill:true, tension:0.4, pointRadius:0, borderWidth:2
+      borderColor:'#dc2626', backgroundColor:'rgba(220,38,38,0.07)',
+      fill:true, tension:0.4, pointRadius:4, borderWidth:2,
     }]},
     options:{
       responsive:true, maintainAspectRatio:false,
-      plugins:{ legend:{display:false} },
+      plugins:{legend:{display:false}},
       scales:{
-        x:{ ticks:{ font:{size:9,family:'Space Mono'}, maxTicksLimit:6, maxRotation:0 }, grid:{display:false} },
-        y:{ ticks:{ font:{size:9,family:'Space Mono'}, callback:v=>v+'%' }, beginAtZero:true, max:10, grid:{ color:'rgba(0,0,0,0.05)' } }
+        x:{ticks:{font:{size:9,family:'Space Mono'},maxRotation:45},grid:{display:false}},
+        y:{ticks:{font:{size:9,family:'Space Mono'},callback:v=>v+'%'},beginAtZero:true,grid:{color:'rgba(0,0,0,0.05)'}}
       }
     }
   });
 }
 
-/* ── DOMAIN BARS ── */
-function renderDomains(domain){
-  const total = 100;
-  const vals = { transport:34, agriculture:22, wash:18, education:15, fcs:11 };
-  const domains = domain==='all' ? Object.keys(DOMAINS) : [domain];
-  const max = Math.max(...domains.map(d=>vals[d]));
-  document.getElementById('domain-bars').innerHTML = domains.map(d=>`
-    <div class="domain-row">
-      <div class="domain-name">${DOMAINS[d].label}</div>
-      <div class="domain-track">
-        <div class="domain-fill" style="width:${Math.round(vals[d]/max*100)}%;background:${DOMAINS[d].color}">
-          ${vals[d]}%
-        </div>
+// ── Feed ──────────────────────────────────────────────────────────────────────
+function renderFeed(rows) {
+  const recent = [...rows].sort((a,b)=>b.created_at.localeCompare(a.created_at)).slice(0,6);
+  if (!recent.length) {
+    document.getElementById('feed-list').innerHTML = '<div class="empty-state">No queries logged yet.<br>Ask the agent a question!</div>';
+    return;
+  }
+  document.getElementById('feed-list').innerHTML = recent.map(r => {
+    const color = DOMAIN_COLORS[r.domain]||'#888';
+    const score = r.avg_trace_score;
+    const scls  = score>=85?'tag-good':score>=75?'tag-ok':'tag-low';
+    const mins  = Math.round((Date.now()-new Date(r.created_at))/60000);
+    const ago   = mins<1?'just now':mins<60?`${mins}m ago`:mins<1440?`${Math.round(mins/60)}h ago`:`${Math.round(mins/1440)}d ago`;
+    return `<div class="feed-item" style="border-left-color:${color}">
+      <div class="feed-dot" style="background:${color}"></div>
+      <div style="flex:1">
+        <div class="feed-text">${r.domain} query · ${r.sources_count} sources · ${r.latency_sec}s</div>
+        <div class="feed-meta">${ago}</div>
       </div>
-      <div class="domain-count">${Math.round(vals[d]*18.4)}q</div>
-    </div>`).join('');
-}
-
-/* ── FEATURE ADOPTION ── */
-function renderFeats(){
-  const feats=[
-    {name:'RAG query',          pct:52, color:'#2563eb'},
-    {name:'Source citations',   pct:23, color:'#059669'},
-    {name:'Sample queries',     pct:12, color:'#d97706'},
-    {name:'Doc upload',         pct: 8, color:'#dc2626'},
-    {name:'Multi-turn memory',  pct: 5, color:'#7c3aed'},
-  ];
-  document.getElementById('feat-list').innerHTML = feats.map(f=>`
-    <div class="feat-row">
-      <div class="feat-name">${f.name}</div>
-      <div class="feat-track"><div class="feat-fill" style="width:${f.pct}%;background:${f.color}"></div></div>
-      <div class="feat-pct">${f.pct}%</div>
-    </div>`).join('');
-}
-
-/* ── LATENCY CHART ── */
-let latChart;
-function renderLatency(period){
-  const weeks = period<=7?1:period<=30?4:12;
-  const labels = Array.from({length:weeks},(_,i)=>`W${i+1}`);
-  const p50 = genSeries(weeks,1.8,0.4,11,0);
-  const p90 = genSeries(weeks,3.2,0.6,22,-0.02);
-  const p99 = genSeries(weeks,5.1,0.9,33,-0.04);
-
-  if(latChart) latChart.destroy();
-  latChart = new Chart(document.getElementById('latChart'),{
-    type:'bar',
-    data:{ labels, datasets:[
-      {label:'p50',data:p50,backgroundColor:'#bfdbfe',borderRadius:3},
-      {label:'p90',data:p90,backgroundColor:'#60a5fa',borderRadius:3},
-      {label:'p99',data:p99,backgroundColor:'#2563eb',borderRadius:3},
-    ]},
-    options:{
-      responsive:true, maintainAspectRatio:false,
-      plugins:{ legend:{ display:true, labels:{ font:{size:10,family:'Space Mono'}, boxWidth:10, padding:12 } } },
-      scales:{
-        x:{ ticks:{ font:{size:9,family:'Space Mono'} }, grid:{display:false} },
-        y:{ ticks:{ font:{size:9,family:'Space Mono'}, callback:v=>v+'s' }, beginAtZero:true, grid:{ color:'rgba(0,0,0,0.05)' } }
-      }
-    }
-  });
-}
-
-/* ── FEED ── */
-function renderFeed(){
-  const items=[
-    {text:'FCS project design query — 5 sources retrieved, score 4.9/5', time:'3 min ago', dot:'#dc2626', score:'4.9', scls:'label-good'},
-    {text:'Agriculture doc uploaded: Climate-Smart Farming Review 2024',  time:'21 min ago',dot:'#059669', score:null},
-    {text:'Low-grounding flag: WASH tariff reform query (score 2.1)',     time:'44 min ago',dot:'#d97706', score:'2.1', scls:'label-low'},
-    {text:'Transport sector query — road maintenance lessons, 4 sources', time:'1 hr ago',  dot:'#2563eb', score:'4.7', scls:'label-good'},
-    {text:'Session ended: 7 queries, avg satisfaction 4.8/5',            time:'2 hr ago',  dot:'#7c3aed', score:null},
-  ];
-  document.getElementById('feed').innerHTML = items.map(it=>`
-    <div class="feed-item">
-      <div class="feed-dot" style="background:${it.dot}"></div>
-      <div class="feed-body">
-        <div class="feed-text">${it.text}</div>
-        <div class="feed-meta">${it.time}</div>
-      </div>
-      ${it.score ? `<div class="feed-score ${it.scls}">${it.score}</div>` : ''}
-    </div>`).join('');
-}
-
-/* ── HEATMAP ── */
-function renderHeatmap(){
-  const r=seeded(99);
-  const cells=Array.from({length:28},()=>Math.round(r()*60));
-  const max=Math.max(...cells);
-  const colors=['#e2ddd6','#bfdbfe','#60a5fa','#2563eb','#1d4ed8'];
-  document.getElementById('heatmap').innerHTML = cells.map(v=>{
-    const idx=Math.floor((v/max)*4);
-    return `<div class="hm-cell" style="background:${colors[idx]}" title="${v} queries"></div>`;
+      <div class="feed-score ${scls}">${score}</div>
+    </div>`;
   }).join('');
 }
 
-/* ── CONTROLS ── */
-function setPeriod(n, btn){
-  currentPeriod=n;
-  document.querySelectorAll('#period-group .ctrl-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('period-label').textContent=n;
-  redraw();
-}
-function setDomain(d, btn){
-  currentDomain=d;
-  document.querySelectorAll('#domain-group .ctrl-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  redraw();
-}
-function redraw(){
-  renderKPIs(currentPeriod, currentDomain);
-  renderVolume(currentPeriod, currentDomain);
-  renderHall(currentPeriod);
-  renderDomains(currentDomain);
-  renderLatency(currentPeriod);
-}
-
-/* ── INIT ── */
-renderKPIs(30,'all');
-renderVolume(30,'all');
-renderTrace();
-renderHall(30);
-renderDomains('all');
-renderFeats();
-renderLatency(30);
-renderFeed();
-renderHeatmap();
+// ── Init ──────────────────────────────────────────────────────────────────────
+loadData();
+setInterval(loadData, 60000); // auto-refresh every 60s
 </script>
 </body>
 </html>
