@@ -11,45 +11,65 @@
 :root{
   --ink:#0a0a0f;--paper:#f4f1eb;--surface:#fff;--surface2:#f9f7f3;
   --border:#e2ddd6;--muted:#9b9490;
-  --blue:#2563eb;--green:#059669;--amber:#d97706;--red:#dc2626;--teal:#0d9488;--purple:#7c3aed;
+  --blue:#2563eb;--green:#059669;--amber:#d97706;--red:#dc2626;
+  --teal:#0d9488;--purple:#7c3aed;
   --ltblue:#dbeafe;--ltgreen:#d1fae5;--ltamber:#fef3c7;--ltred:#fee2e2;
   --mono:'Space Mono',monospace;--display:'Syne',sans-serif;--body:'DM Sans',sans-serif;
 }
 body{font-family:var(--body);background:var(--paper);color:var(--ink);min-height:100vh;font-size:14px}
-.header{background:var(--ink);color:var(--paper);padding:24px 36px;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px}
-.header-title{font-family:var(--display);font-size:22px;font-weight:800;margin-bottom:4px}
-.header-sub{font-size:11px;color:rgba(244,241,235,0.5);font-family:var(--mono)}
-.header-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
-.live-badge{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;color:rgba(244,241,235,0.7);background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);padding:5px 10px;border-radius:4px}
+
+/* HEADER */
+.header{background:var(--ink);color:var(--paper);padding:24px 36px;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;position:relative;overflow:hidden}
+.header::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;border:1px solid rgba(244,241,235,0.06);border-radius:50%}
+.header-eyebrow{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:rgba(244,241,235,0.35);margin-bottom:6px;text-transform:uppercase}
+.header-title{font-family:var(--display);font-size:24px;font-weight:800;margin-bottom:4px}
+.header-sub{font-size:11px;color:rgba(244,241,235,0.5);font-family:var(--mono);max-width:420px}
+.header-right{display:flex;flex-direction:column;align-items:flex-end;gap:7px}
+.live-badge{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;color:rgba(244,241,235,0.75);background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.14);padding:6px 12px;border-radius:4px}
 .live-dot{width:7px;height:7px;border-radius:50%;background:#10b981;animation:blink 2s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
-.sim-note{font-family:var(--mono);font-size:9px;color:rgba(244,241,235,0.35);letter-spacing:0.5px}
+.sim-note{font-family:var(--mono);font-size:9px;color:rgba(244,241,235,0.3);letter-spacing:0.5px}
+
+/* CONTROLS */
 .controls{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 36px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 .ctrl-label{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
 .ctrl-btn{font-family:var(--mono);font-size:10px;padding:5px 12px;border-radius:3px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all 0.15s}
 .ctrl-btn:hover{border-color:var(--ink);color:var(--ink)}
 .ctrl-btn.active{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.ctrl-sep{width:1px;height:22px;background:var(--border)}
 .refresh-btn{font-family:var(--mono);font-size:10px;padding:5px 12px;border-radius:3px;border:1px solid var(--blue);background:var(--ltblue);color:var(--blue);cursor:pointer;margin-left:auto;transition:all 0.15s}
 .refresh-btn:hover{background:var(--blue);color:#fff}
+
+/* LOADING */
 .loading-bar{height:2px;background:linear-gradient(90deg,var(--blue),var(--teal));width:0%;transition:width 0.5s;position:fixed;top:0;left:0;z-index:999}
+
+/* LAYOUT */
 .main{padding:28px 36px;display:flex;flex-direction:column;gap:20px}
+.charts-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.charts-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+@media(max-width:900px){.charts-2,.charts-3{grid-template-columns:1fr}}
+
+/* KPI STRIP */
 .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:8px;overflow:hidden}
 .kpi{background:var(--surface);padding:16px 18px}
 .kpi-label{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:5px}
-.kpi-dot{width:6px;height:6px;border-radius:50%}
+.kpi-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
 .kpi-val{font-family:var(--display);font-size:26px;font-weight:800;line-height:1;margin-bottom:3px}
 .kpi-sub{font-family:var(--mono);font-size:9px;color:var(--muted)}
-.charts-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.charts-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
-@media(max-width:860px){.charts-2,.charts-3{grid-template-columns:1fr}}
+
+/* CARDS */
 .card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:18px 20px}
 .card-title{font-family:var(--display);font-size:13px;font-weight:700;margin-bottom:2px}
 .card-sub{font-size:11px;color:var(--muted);margin-bottom:14px;font-family:var(--mono)}
+
+/* DOMAIN BARS */
 .domain-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-.domain-name{font-size:11px;font-family:var(--mono);min-width:88px}
-.domain-track{flex:1;height:16px;background:var(--surface2);border-radius:3px;overflow:hidden}
-.domain-fill{height:100%;border-radius:3px;display:flex;align-items:center;padding-left:7px;font-family:var(--mono);font-size:9px;color:#fff;font-weight:700;transition:width 0.8s cubic-bezier(.4,0,.2,1)}
+.domain-name{font-size:11px;font-family:var(--mono);min-width:90px}
+.domain-track{flex:1;height:17px;background:var(--surface2);border-radius:3px;overflow:hidden}
+.domain-fill{height:100%;border-radius:3px;display:flex;align-items:center;padding-left:8px;font-family:var(--mono);font-size:9px;color:#fff;font-weight:700;transition:width 0.8s cubic-bezier(.4,0,.2,1)}
 .domain-count{font-family:var(--mono);font-size:10px;color:var(--muted);min-width:28px;text-align:right}
+
+/* TRACE SCORES */
 .trace-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
 .trace-row:last-child{border-bottom:none}
 .trace-name{font-size:12px;min-width:130px}
@@ -60,12 +80,42 @@ body{font-family:var(--body);background:var(--paper);color:var(--ink);min-height
 .tag-good{background:var(--ltgreen);color:#065f46}
 .tag-ok{background:var(--ltamber);color:#92400e}
 .tag-low{background:var(--ltred);color:#991b1b}
-.feed-item{padding:9px 10px;background:var(--surface2);border-radius:5px;margin-bottom:6px;display:flex;gap:10px;border-left:3px solid transparent}
+
+/* FEATURE ADOPTION */
+.feat-row{display:grid;grid-template-columns:130px 1fr 38px;align-items:center;gap:10px;margin-bottom:10px}
+.feat-name{font-size:12px}
+.feat-track{height:6px;background:var(--surface2);border-radius:3px;overflow:hidden}
+.feat-fill{height:100%;border-radius:3px}
+.feat-pct{font-family:var(--mono);font-size:11px;text-align:right;color:var(--muted)}
+
+/* FEED */
+.feed-item{padding:9px 10px;background:var(--surface2);border-radius:5px;margin-bottom:6px;display:flex;gap:10px;border-left:3px solid transparent;transition:border-color 0.15s}
+.feed-item:hover{border-left-color:var(--blue)}
 .feed-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.feed-body{flex:1}
 .feed-text{font-size:11.5px;line-height:1.4;margin-bottom:2px}
 .feed-meta{font-family:var(--mono);font-size:9px;color:var(--muted)}
-.feed-score{font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:3px;flex-shrink:0;align-self:center}
-.empty-state{text-align:center;padding:32px;color:var(--muted);font-family:var(--mono);font-size:11px}
+.feed-score{font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:3px;align-self:center;flex-shrink:0}
+
+/* HEATMAP */
+.heatmap-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-top:6px}
+.hm-cell{aspect-ratio:1;border-radius:2px;transition:opacity 0.15s;cursor:default}
+.hm-cell:hover{opacity:0.7}
+.hm-legend{display:flex;align-items:center;gap:5px;margin-top:6px;font-family:var(--mono);font-size:9px;color:var(--muted)}
+.hm-legend-cells{display:flex;gap:2px}
+.hm-legend-cell{width:10px;height:10px;border-radius:2px}
+
+/* LATENCY TABLE */
+.lat-table{width:100%;border-collapse:collapse;font-size:11px;margin-top:4px}
+.lat-table th{font-family:var(--mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);padding:6px 8px;text-align:left;border-bottom:1px solid var(--border)}
+.lat-table td{padding:7px 8px;border-bottom:1px solid var(--border);font-family:var(--mono)}
+.lat-table tr:last-child td{border-bottom:none}
+.lat-table tr:nth-child(even) td{background:var(--surface2)}
+
+/* EMPTY */
+.empty-state{text-align:center;padding:28px;color:var(--muted);font-family:var(--mono);font-size:11px;line-height:1.6}
+
+/* FOOTER */
 .footer{background:var(--ink);color:rgba(244,241,235,0.4);padding:14px 36px;font-family:var(--mono);font-size:9px;letter-spacing:0.5px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
 .footer strong{color:rgba(244,241,235,0.7)}
 </style>
@@ -73,31 +123,40 @@ body{font-family:var(--body);background:var(--paper);color:var(--ink);min-height
 <body>
 <div class="loading-bar" id="loading-bar"></div>
 
+<!-- HEADER -->
 <div class="header">
   <div>
-    <div style="font-family:var(--mono);font-size:9px;letter-spacing:2px;color:rgba(244,241,235,0.35);margin-bottom:6px;text-transform:uppercase">AI Performance Monitor · v2.0</div>
+    <div class="header-eyebrow">AI Performance Monitor · v2.0</div>
     <div class="header-title">Sector AI Agent Dashboard</div>
-    <div class="header-sub">Live observability · Supabase · RAGBench TRACe framework</div>
+    <div class="header-sub">Live observability · Supabase PostgreSQL · RAGBench TRACe framework</div>
   </div>
   <div class="header-right">
     <div class="live-badge"><span class="live-dot"></span>Connected to Supabase</div>
-    <div class="sim-note">Quality scores: heuristic TRACe model · Scores are estimates</div>
+    <div id="last-updated" class="sim-note">Loading...</div>
   </div>
 </div>
 
+<!-- CONTROLS -->
 <div class="controls">
-  <span class="ctrl-label">View</span>
-  <button class="ctrl-btn active" onclick="setView('live',this)">Live Data</button>
-  <button class="ctrl-btn" onclick="setView('sim',this)">+ Simulated</button>
+  <span class="ctrl-label">Data</span>
+  <button class="ctrl-btn active" onclick="setView('live',this)">Live only</button>
+  <button class="ctrl-btn" onclick="setView('sim',this)">Live + Simulated</button>
+  <div class="ctrl-sep"></div>
+  <span class="ctrl-label">Period</span>
+  <button class="ctrl-btn active" onclick="setPeriod(7,this)">7D</button>
+  <button class="ctrl-btn" onclick="setPeriod(30,this)">30D</button>
+  <button class="ctrl-btn" onclick="setPeriod(90,this)">90D</button>
   <button class="refresh-btn" onclick="loadData()">⟳ Refresh</button>
-  <span id="last-updated" style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-left:4px"></span>
 </div>
 
 <div class="main">
+
+  <!-- KPI STRIP -->
   <div class="kpi-grid" id="kpi-grid">
-    <div class="kpi"><div class="kpi-label">Loading...</div><div class="kpi-val">—</div></div>
+    <div class="kpi"><div class="kpi-label">Loading…</div><div class="kpi-val">—</div></div>
   </div>
 
+  <!-- ROW 1: Volume + Domain -->
   <div class="charts-2">
     <div class="card">
       <div class="card-title">Query volume over time</div>
@@ -113,9 +172,10 @@ body{font-family:var(--body);background:var(--paper);color:var(--ink);min-height
     </div>
   </div>
 
+  <!-- ROW 2: Latency + TRACe -->
   <div class="charts-2">
     <div class="card">
-      <div class="card-title">Response latency</div>
+      <div class="card-title">Response latency per query</div>
       <div class="card-sub">Seconds per query · live from Supabase</div>
       <div style="position:relative;width:100%;height:190px">
         <canvas id="latChart"></canvas>
@@ -123,118 +183,177 @@ body{font-family:var(--body);background:var(--paper);color:var(--ink);min-height
     </div>
     <div class="card">
       <div class="card-title">TRACe quality scores</div>
-      <div class="card-sub">Avg relevance · grounding · completeness</div>
+      <div class="card-sub">Avg relevance · grounding · completeness · overall</div>
       <div id="trace-scores"></div>
     </div>
   </div>
 
+  <!-- ROW 3: Hallucination + Feature Adoption -->
   <div class="charts-2">
     <div class="card">
       <div class="card-title">Hallucination flag rate</div>
-      <div class="card-sub">% queries flagged for low grounding · live</div>
+      <div class="card-sub">% queries flagged for low grounding · per day</div>
       <div style="position:relative;width:100%;height:190px">
         <canvas id="hallChart"></canvas>
       </div>
     </div>
     <div class="card">
+      <div class="card-title">Feature adoption</div>
+      <div class="card-sub">Capability engagement breakdown · simulated</div>
+      <div id="feat-list" style="margin-top:4px"></div>
+    </div>
+  </div>
+
+  <!-- ROW 4: Feed + Heatmap -->
+  <div class="charts-2">
+    <div class="card">
       <div class="card-title">Recent query feed</div>
       <div class="card-sub">Latest agent interactions · live from Supabase</div>
       <div id="feed-list"></div>
     </div>
+    <div class="card">
+      <div class="card-title">Latency breakdown</div>
+      <div class="card-sub">Per-query response times · live from Supabase</div>
+      <div style="overflow-x:auto">
+        <table class="lat-table" id="lat-table">
+          <thead><tr><th>#</th><th>Domain</th><th>Latency</th><th>TRACe</th><th>Flag</th></tr></thead>
+          <tbody id="lat-tbody"></tbody>
+        </table>
+      </div>
+      <div style="margin-top:18px">
+        <div class="card-title" style="margin-bottom:2px">Weekly query heatmap</div>
+        <div class="card-sub" style="margin-bottom:4px">Activity by day · Mon–Sun · 4 weeks</div>
+        <div class="heatmap-grid" id="heatmap"></div>
+        <div class="hm-legend">
+          <span>Less</span>
+          <div class="hm-legend-cells">
+            <div class="hm-legend-cell" style="background:#e2ddd6"></div>
+            <div class="hm-legend-cell" style="background:#bfdbfe"></div>
+            <div class="hm-legend-cell" style="background:#60a5fa"></div>
+            <div class="hm-legend-cell" style="background:#2563eb"></div>
+            <div class="hm-legend-cell" style="background:#1d4ed8"></div>
+          </div>
+          <span>More</span>
+        </div>
+      </div>
+    </div>
   </div>
+
 </div>
 
 <div class="footer">
-  <span><strong>Data source:</strong> Supabase PostgreSQL · sector-ai-agent project · query_logs table</span>
-  <span><strong>Quality scoring:</strong> Heuristic TRACe model (Relevance + Grounding + Completeness) · Sector AI Agent · Perpetual T. Adu · 2026</span>
+  <span><strong>Live data:</strong> Supabase PostgreSQL · sector-ai-agent · query_logs table · auto-refreshes every 60s</span>
+  <span><strong>Quality scoring:</strong> Heuristic TRACe model · Feature adoption &amp; heatmap: simulated · Perpetual T. Adu · 2026</span>
 </div>
 
 <script>
 const API = 'https://sector-ai-agent.onrender.com';
 const DOMAIN_COLORS = {
-  Transport:'#2563eb', Agriculture:'#059669', WASH:'#0d9488',
-  Education:'#d97706', FCS:'#dc2626', General:'#7c3aed'
+  Transport:'#2563eb',Agriculture:'#059669',WASH:'#0d9488',
+  Education:'#d97706',FCS:'#dc2626',General:'#7c3aed'
 };
 let currentView = 'live';
-let volChart, latChart, hallChart;
+let currentPeriod = 7;
 let liveRows = [];
+let volChart, latChart, hallChart;
 
+// ── Controls ──────────────────────────────────────────────────────────────────
 function setView(v, btn) {
   currentView = v;
-  document.querySelectorAll('.ctrl-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.controls .ctrl-btn').forEach(b => {
+    if(['Live only','Live + Simulated'].includes(b.textContent)) b.classList.remove('active');
+  });
   btn.classList.add('active');
   renderAll(liveRows);
 }
 
-function showLoading(on) {
-  document.getElementById('loading-bar').style.width = on ? '70%' : '100%';
-  if (!on) setTimeout(() => document.getElementById('loading-bar').style.width = '0%', 400);
+function setPeriod(n, btn) {
+  currentPeriod = n;
+  document.querySelectorAll('.controls .ctrl-btn').forEach(b => {
+    if(['7D','30D','90D'].includes(b.textContent)) b.classList.remove('active');
+  });
+  btn.classList.add('active');
+  renderAll(liveRows);
 }
 
-// ── Simulated extra rows to pad live data ─────────────────────────────────────
-function seeded(seed){ let s=seed; return ()=>{ s=(s*1664525+1013904223)&0xffffffff; return (s>>>0)/0xffffffff; }; }
+// ── Loading bar ───────────────────────────────────────────────────────────────
+function showLoading(on) {
+  const bar = document.getElementById('loading-bar');
+  bar.style.width = on ? '70%' : '100%';
+  if (!on) setTimeout(() => bar.style.width = '0%', 400);
+}
 
-function getSimRows(n=60) {
+// ── Seeded random for simulated data ─────────────────────────────────────────
+function seeded(seed) {
+  let s = seed;
+  return () => { s = (s * 1664525 + 1013904223) & 0xffffffff; return (s >>> 0) / 0xffffffff; };
+}
+
+function getSimRows(n = 80) {
   const r = seeded(42);
   const domains = ['Transport','Agriculture','WASH','Education','FCS'];
   const now = new Date();
-  return Array.from({length:n}, (_,i) => {
-    const d = new Date(now - (n-i) * 3600000 * 4);
-    const domain = domains[Math.floor(r()*5)];
-    const rel = Math.round(70 + r()*28);
-    const grd = Math.round(65 + r()*30);
-    const cmp = Math.round(68 + r()*28);
-    const avg = +((rel+grd+cmp)/3).toFixed(1);
+  return Array.from({length: n}, (_, i) => {
+    const d = new Date(now - (n - i) * 3600000 * 3);
+    const domain = domains[Math.floor(r() * 5)];
+    const rel = Math.round(70 + r() * 28);
+    const grd = Math.round(65 + r() * 30);
+    const cmp = Math.round(68 + r() * 28);
+    const avg = +((rel + grd + cmp) / 3).toFixed(1);
     return {
-      created_at: d.toISOString(),
-      domain,
-      latency_sec: +(3 + r()*12).toFixed(2),
-      relevance_score: rel,
-      grounding_score: grd,
-      completeness_score: cmp,
-      avg_trace_score: avg,
-      hallucination_flag: avg < 74,
-      sources_count: 5,
+      created_at: d.toISOString(), domain,
+      latency_sec: +(3 + r() * 12).toFixed(2),
+      relevance_score: rel, grounding_score: grd,
+      completeness_score: cmp, avg_trace_score: avg,
+      hallucination_flag: avg < 74, sources_count: 5,
     };
   });
 }
 
-// ── Load from /stats ───────────────────────────────────────────────────────────
+// ── Filter by period ──────────────────────────────────────────────────────────
+function filterByPeriod(rows) {
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - currentPeriod);
+  return rows.filter(r => new Date(r.created_at) >= cutoff);
+}
+
+function getRows() {
+  const base = currentView === 'sim' ? [...liveRows, ...getSimRows(80)] : liveRows;
+  return filterByPeriod(base);
+}
+
+// ── Load from /stats ──────────────────────────────────────────────────────────
 async function loadData() {
   showLoading(true);
   try {
     const res = await fetch(`${API}/stats`);
-    if (!res.ok) throw new Error('Stats endpoint error');
+    if (!res.ok) throw new Error('stats error');
     const data = await res.json();
     liveRows = data.rows || [];
     document.getElementById('last-updated').textContent =
       'Updated ' + new Date().toLocaleTimeString();
     renderAll(liveRows);
   } catch(e) {
-    console.warn('Could not reach /stats:', e.message);
-    // Fallback: show simulated data with a note
     liveRows = [];
+    document.getElementById('last-updated').textContent =
+      '⚠ Backend sleeping — click Refresh or wait 60s';
     renderAll([]);
-    document.getElementById('last-updated').textContent = '⚠ Using simulated data (backend sleeping)';
   }
   showLoading(false);
 }
 
-function getRows() {
-  if (currentView === 'sim') return [...liveRows, ...getSimRows(50)];
-  return liveRows;
-}
-
-// ── Render all panels ─────────────────────────────────────────────────────────
 function renderAll(rows) {
-  const all = getRows();
-  renderKPIs(all);
-  renderVolume(all);
-  renderDomains(all);
-  renderLatency(all);
-  renderTrace(all);
-  renderHall(all);
-  renderFeed(rows); // feed always live only
+  const filtered = getRows();
+  renderKPIs(filtered);
+  renderVolume(filtered);
+  renderDomains(filtered);
+  renderLatency(filtered);
+  renderTrace(filtered);
+  renderHall(filtered);
+  renderFeed(liveRows); // feed always live only
+  renderFeatAdoption();
+  renderLatTable(filtered);
+  renderHeatmap(filtered);
 }
 
 // ── KPIs ──────────────────────────────────────────────────────────────────────
@@ -244,14 +363,15 @@ function renderKPIs(rows) {
   const avgTrc  = n ? (rows.reduce((a,r)=>a+(r.avg_trace_score||0),0)/n).toFixed(1) : '—';
   const hallPct = n ? (rows.filter(r=>r.hallucination_flag).length/n*100).toFixed(1) : '—';
   const domains = [...new Set(rows.map(r=>r.domain))].length;
+  const avgSrc  = n ? (rows.reduce((a,r)=>a+(r.sources_count||0),0)/n).toFixed(1) : '—';
 
   const kpis = [
-    {label:'Total queries',   val: n,        sub:'logged to Supabase',     dot:'#2563eb'},
-    {label:'Avg latency',     val: avgLat+'s', sub:'seconds per response', dot:'#0d9488'},
-    {label:'Avg TRACe score', val: avgTrc,   sub:'quality score / 100',    dot:'#059669'},
-    {label:'Hallucination %', val: hallPct+'%', sub:'flagged low grounding',dot:'#dc2626'},
-    {label:'Domains active',  val: domains,  sub:'knowledge sectors queried',dot:'#7c3aed'},
-    {label:'Sources / query', val: n ? (rows.reduce((a,r)=>a+(r.sources_count||0),0)/n).toFixed(1) : '—', sub:'avg retrieved chunks', dot:'#d97706'},
+    {label:'Total queries',    val:n,             sub:'logged to Supabase',      dot:'#2563eb'},
+    {label:'Avg latency',      val:avgLat+'s',    sub:'seconds per response',    dot:'#0d9488'},
+    {label:'Avg TRACe score',  val:avgTrc,        sub:'quality score / 100',     dot:'#059669'},
+    {label:'Hallucination %',  val:hallPct+'%',   sub:'flagged low grounding',   dot:'#dc2626'},
+    {label:'Domains active',   val:domains,       sub:'knowledge sectors queried',dot:'#7c3aed'},
+    {label:'Sources / query',  val:avgSrc,        sub:'avg retrieved chunks',    dot:'#d97706'},
   ];
 
   document.getElementById('kpi-grid').innerHTML = kpis.map(k=>`
@@ -264,29 +384,20 @@ function renderKPIs(rows) {
 
 // ── Volume chart ──────────────────────────────────────────────────────────────
 function renderVolume(rows) {
-  // Group by date
   const byDate = {};
-  rows.forEach(r => {
-    const d = r.created_at.slice(0,10);
-    byDate[d] = (byDate[d]||0) + 1;
-  });
+  rows.forEach(r => { const d=r.created_at.slice(0,10); byDate[d]=(byDate[d]||0)+1; });
   const labels = Object.keys(byDate).sort();
-  const data   = labels.map(l => byDate[l]);
-
+  const data   = labels.map(l=>byDate[l]);
   if (volChart) volChart.destroy();
-  volChart = new Chart(document.getElementById('volChart'), {
-    type: 'bar',
-    data: { labels, datasets: [{
-      label: 'Queries', data,
-      backgroundColor: '#dbeafe', borderColor: '#2563eb',
-      borderWidth: 1.5, borderRadius: 3,
-    }]},
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { ticks: { font:{size:9,family:'Space Mono'}, maxRotation:45 }, grid:{display:false} },
-        y: { ticks: { font:{size:9,family:'Space Mono'} }, beginAtZero:true, grid:{color:'rgba(0,0,0,0.05)'} }
+  volChart = new Chart(document.getElementById('volChart'),{
+    type:'bar',
+    data:{ labels, datasets:[{ label:'Queries', data,
+      backgroundColor:'#dbeafe', borderColor:'#2563eb', borderWidth:1.5, borderRadius:3 }]},
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false} },
+      scales:{
+        x:{ ticks:{font:{size:9,family:'Space Mono'},maxRotation:45,maxTicksLimit:10}, grid:{display:false} },
+        y:{ ticks:{font:{size:9,family:'Space Mono'}}, beginAtZero:true, grid:{color:'rgba(0,0,0,0.05)'} }
       }
     }
   });
@@ -295,43 +406,38 @@ function renderVolume(rows) {
 // ── Domain bars ───────────────────────────────────────────────────────────────
 function renderDomains(rows) {
   const counts = {};
-  rows.forEach(r => counts[r.domain] = (counts[r.domain]||0)+1);
+  rows.forEach(r => counts[r.domain]=(counts[r.domain]||0)+1);
   const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
   const max = sorted[0]?.[1] || 1;
-
+  const total = rows.length || 1;
   if (!sorted.length) {
-    document.getElementById('domain-bars').innerHTML = '<div class="empty-state">No data yet</div>';
+    document.getElementById('domain-bars').innerHTML = '<div class="empty-state">No data yet.<br>Ask the agent a question!</div>';
     return;
   }
-
   document.getElementById('domain-bars').innerHTML = sorted.map(([d,c])=>`
     <div class="domain-row">
       <div class="domain-name">${d}</div>
       <div class="domain-track">
         <div class="domain-fill" style="width:${Math.round(c/max*100)}%;background:${DOMAIN_COLORS[d]||'#888'}">
-          ${Math.round(c/rows.length*100)}%
+          ${Math.round(c/total*100)}%
         </div>
       </div>
       <div class="domain-count">${c}q</div>
     </div>`).join('');
 }
 
-// ── Latency chart ─────────────────────────────────────────────────────────────
+// ── Latency line chart ────────────────────────────────────────────────────────
 function renderLatency(rows) {
   const sorted = [...rows].sort((a,b)=>a.created_at.localeCompare(b.created_at));
   const labels = sorted.map((_,i)=>`Q${i+1}`);
   const data   = sorted.map(r=>+(r.latency_sec||0).toFixed(2));
-
   if (latChart) latChart.destroy();
-  latChart = new Chart(document.getElementById('latChart'), {
-    type: 'line',
-    data: { labels, datasets: [{
-      label:'Latency (s)', data,
+  latChart = new Chart(document.getElementById('latChart'),{
+    type:'line',
+    data:{ labels, datasets:[{ label:'Latency (s)', data,
       borderColor:'#0d9488', backgroundColor:'rgba(13,148,136,0.08)',
-      fill:true, tension:0.4, pointRadius:3, borderWidth:2,
-    }]},
-    options: {
-      responsive:true, maintainAspectRatio:false,
+      fill:true, tension:0.4, pointRadius:3, borderWidth:2 }]},
+    options:{ responsive:true, maintainAspectRatio:false,
       plugins:{ legend:{display:false} },
       scales:{
         x:{ ticks:{font:{size:9,family:'Space Mono'},maxTicksLimit:10}, grid:{display:false} },
@@ -345,17 +451,15 @@ function renderLatency(rows) {
 function renderTrace(rows) {
   const n = rows.length || 1;
   const avg = key => +(rows.reduce((a,r)=>a+(r[key]||0),0)/n).toFixed(1);
-
   const scores = [
-    {name:'Relevance',          val:avg('relevance_score'),    color:'#2563eb'},
-    {name:'Grounding',          val:avg('grounding_score'),    color:'#059669'},
-    {name:'Completeness',       val:avg('completeness_score'), color:'#7c3aed'},
-    {name:'Avg TRACe score',    val:avg('avg_trace_score'),    color:'#0d9488'},
+    {name:'Relevance',     val:avg('relevance_score'),    color:'#2563eb'},
+    {name:'Grounding',     val:avg('grounding_score'),    color:'#059669'},
+    {name:'Completeness',  val:avg('completeness_score'), color:'#7c3aed'},
+    {name:'Avg TRACe',     val:avg('avg_trace_score'),    color:'#0d9488'},
   ];
-
   document.getElementById('trace-scores').innerHTML = scores.map(s=>{
-    const lbl = s.val>=85?'Excellent':s.val>=75?'Good':'Needs work';
-    const cls = s.val>=85?'tag-good':s.val>=75?'tag-ok':'tag-low';
+    const lbl=s.val>=85?'Excellent':s.val>=75?'Good':'Needs work';
+    const cls=s.val>=85?'tag-good':s.val>=75?'tag-ok':'tag-low';
     return `<div class="trace-row">
       <div class="trace-name">${s.name}</div>
       <div class="trace-track"><div class="trace-fill" style="width:${s.val}%;background:${s.color}"></div></div>
@@ -367,52 +471,64 @@ function renderTrace(rows) {
 
 // ── Hallucination chart ───────────────────────────────────────────────────────
 function renderHall(rows) {
-  const byDate = {};
-  const totals = {};
-  rows.forEach(r => {
-    const d = r.created_at.slice(0,10);
-    totals[d] = (totals[d]||0)+1;
-    if(r.hallucination_flag) byDate[d] = (byDate[d]||0)+1;
+  const byDate={}, totals={};
+  rows.forEach(r=>{
+    const d=r.created_at.slice(0,10);
+    totals[d]=(totals[d]||0)+1;
+    if(r.hallucination_flag) byDate[d]=(byDate[d]||0)+1;
   });
-  const labels = Object.keys(totals).sort();
-  const data   = labels.map(l => totals[l] ? +((byDate[l]||0)/totals[l]*100).toFixed(1) : 0);
-
+  const labels=Object.keys(totals).sort();
+  const data=labels.map(l=>totals[l]?+((byDate[l]||0)/totals[l]*100).toFixed(1):0);
   if (hallChart) hallChart.destroy();
-  hallChart = new Chart(document.getElementById('hallChart'), {
-    type: 'line',
-    data: { labels, datasets:[{
-      label:'Hallucination %', data,
+  hallChart = new Chart(document.getElementById('hallChart'),{
+    type:'line',
+    data:{ labels, datasets:[{ label:'Hallucination %', data,
       borderColor:'#dc2626', backgroundColor:'rgba(220,38,38,0.07)',
-      fill:true, tension:0.4, pointRadius:4, borderWidth:2,
-    }]},
-    options:{
-      responsive:true, maintainAspectRatio:false,
-      plugins:{legend:{display:false}},
+      fill:true, tension:0.4, pointRadius:4, borderWidth:2 }]},
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false} },
       scales:{
-        x:{ticks:{font:{size:9,family:'Space Mono'},maxRotation:45},grid:{display:false}},
-        y:{ticks:{font:{size:9,family:'Space Mono'},callback:v=>v+'%'},beginAtZero:true,grid:{color:'rgba(0,0,0,0.05)'}}
+        x:{ ticks:{font:{size:9,family:'Space Mono'},maxRotation:45,maxTicksLimit:8}, grid:{display:false} },
+        y:{ ticks:{font:{size:9,family:'Space Mono'},callback:v=>v+'%'}, beginAtZero:true, grid:{color:'rgba(0,0,0,0.05)'} }
       }
     }
   });
 }
 
+// ── Feature adoption (always simulated — not tracked in DB) ───────────────────
+function renderFeatAdoption() {
+  const feats=[
+    {name:'RAG query (core)',      pct:52, color:'#2563eb'},
+    {name:'Source citations',      pct:23, color:'#059669'},
+    {name:'Sample query chips',    pct:12, color:'#d97706'},
+    {name:'Document upload',       pct: 8, color:'#dc2626'},
+    {name:'Multi-turn memory',     pct: 5, color:'#7c3aed'},
+  ];
+  document.getElementById('feat-list').innerHTML = feats.map(f=>`
+    <div class="feat-row">
+      <div class="feat-name">${f.name}</div>
+      <div class="feat-track"><div class="feat-fill" style="width:${f.pct}%;background:${f.color}"></div></div>
+      <div class="feat-pct">${f.pct}%</div>
+    </div>`).join('');
+}
+
 // ── Feed ──────────────────────────────────────────────────────────────────────
 function renderFeed(rows) {
-  const recent = [...rows].sort((a,b)=>b.created_at.localeCompare(a.created_at)).slice(0,6);
+  const recent=[...rows].sort((a,b)=>b.created_at.localeCompare(a.created_at)).slice(0,6);
   if (!recent.length) {
-    document.getElementById('feed-list').innerHTML = '<div class="empty-state">No queries logged yet.<br>Ask the agent a question!</div>';
+    document.getElementById('feed-list').innerHTML='<div class="empty-state">No queries logged yet.<br>Ask the agent a question!</div>';
     return;
   }
-  document.getElementById('feed-list').innerHTML = recent.map(r => {
-    const color = DOMAIN_COLORS[r.domain]||'#888';
-    const score = r.avg_trace_score;
-    const scls  = score>=85?'tag-good':score>=75?'tag-ok':'tag-low';
-    const mins  = Math.round((Date.now()-new Date(r.created_at))/60000);
-    const ago   = mins<1?'just now':mins<60?`${mins}m ago`:mins<1440?`${Math.round(mins/60)}h ago`:`${Math.round(mins/1440)}d ago`;
+  document.getElementById('feed-list').innerHTML = recent.map(r=>{
+    const color=DOMAIN_COLORS[r.domain]||'#888';
+    const score=r.avg_trace_score||0;
+    const scls=score>=85?'tag-good':score>=75?'tag-ok':'tag-low';
+    const mins=Math.round((Date.now()-new Date(r.created_at))/60000);
+    const ago=mins<1?'just now':mins<60?`${mins}m ago`:mins<1440?`${Math.round(mins/60)}h ago`:`${Math.round(mins/1440)}d ago`;
     return `<div class="feed-item" style="border-left-color:${color}">
       <div class="feed-dot" style="background:${color}"></div>
-      <div style="flex:1">
-        <div class="feed-text">${r.domain} query · ${r.sources_count} sources · ${r.latency_sec}s</div>
+      <div class="feed-body">
+        <div class="feed-text">${r.domain} query · ${r.sources_count||0} sources · ${r.latency_sec}s</div>
         <div class="feed-meta">${ago}</div>
       </div>
       <div class="feed-score ${scls}">${score}</div>
@@ -420,9 +536,51 @@ function renderFeed(rows) {
   }).join('');
 }
 
+// ── Latency table ─────────────────────────────────────────────────────────────
+function renderLatTable(rows) {
+  const recent=[...rows].sort((a,b)=>b.created_at.localeCompare(a.created_at)).slice(0,8);
+  if (!recent.length) {
+    document.getElementById('lat-tbody').innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:16px;font-family:var(--mono);font-size:10px">No data</td></tr>';
+    return;
+  }
+  document.getElementById('lat-tbody').innerHTML = recent.map((r,i)=>`
+    <tr>
+      <td>${i+1}</td>
+      <td style="color:${DOMAIN_COLORS[r.domain]||'#888'}">${r.domain}</td>
+      <td>${r.latency_sec}s</td>
+      <td>${r.avg_trace_score||'—'}</td>
+      <td>${r.hallucination_flag?'⚠ Yes':'✓ No'}</td>
+    </tr>`).join('');
+}
+
+// ── Heatmap (built from real dates + simulated counts) ────────────────────────
+function renderHeatmap(rows) {
+  const byDate={};
+  rows.forEach(r=>{ const d=r.created_at.slice(0,10); byDate[d]=(byDate[d]||0)+1; });
+
+  // Build 28-cell grid (Mon-Sun × 4 weeks)
+  const cells=[];
+  const now=new Date();
+  for(let w=3;w>=0;w--) {
+    for(let d=0;d<7;d++) {
+      const date=new Date(now);
+      date.setDate(date.getDate()-((w*7)+(6-d)));
+      const key=date.toISOString().slice(0,10);
+      cells.push({ date:key, count:byDate[key]||0 });
+    }
+  }
+  const maxCount=Math.max(...cells.map(c=>c.count),1);
+  const colors=['#e2ddd6','#bfdbfe','#60a5fa','#2563eb','#1d4ed8'];
+
+  document.getElementById('heatmap').innerHTML=cells.map(c=>{
+    const idx=c.count===0?0:Math.min(4,Math.ceil(c.count/maxCount*4));
+    return `<div class="hm-cell" style="background:${colors[idx]}" title="${c.date}: ${c.count} queries"></div>`;
+  }).join('');
+}
+
 // ── Init ──────────────────────────────────────────────────────────────────────
 loadData();
-setInterval(loadData, 60000); // auto-refresh every 60s
+setInterval(loadData, 60000);
 </script>
 </body>
 </html>
