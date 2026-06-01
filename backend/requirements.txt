@@ -1,6 +1,7 @@
 langchain==0.3.25
 langchain-community==0.3.23
 langchain-openai==0.3.16
+langgraph==0.2.56
 faiss-cpu==1.14.2
 pypdf==5.4.0
 fastapi==0.115.12
