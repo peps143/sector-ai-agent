@@ -1,12 +1,12 @@
 """
-FastAPI server for the Sector AI Agent
+FastAPI server for the Sector AI Agent — Multi-Agent Edition
+Orchestrates a 5-agent LangGraph pipeline with real FAISS retrieval
 Auto-initializes on startup and logs every query to Supabase
 """
 
 import os
 import time
 import uuid
-from datetime import datetime
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, UploadFile, File
@@ -15,71 +15,48 @@ from pydantic import BaseModel
 from supabase import create_client, Client
 
 from rag_agent import AgentConfig, SectorAgent
+from pipeline import run_pipeline, get_vectorstore
 
-# ── Supabase client ───────────────────────────────────────────────────────────
+# ── Supabase ──────────────────────────────────────────────────────────────────
+supabase: Client | None = None
+
 def get_supabase() -> Client | None:
     url = os.getenv("SUPABASE_URL", "")
     key = os.getenv("SUPABASE_KEY", "")
     if url and key:
         return create_client(url, key)
-    print("[WARN] Supabase not configured — logging disabled")
     return None
 
-supabase: Client | None = None
-
-# ── Domain detector ───────────────────────────────────────────────────────────
-DOMAIN_KEYWORDS = {
-    "Transport":    ["road","transport","infrastructure","bridge","highway","procurement","contractor"],
-    "Agriculture":  ["agri","farm","crop","food","irrigation","extension","digital agri","climate-smart"],
-    "WASH":         ["water","sanitation","wash","tariff","nrw","hygiene","utility"],
-    "Education":    ["school","teacher","learning","education","literacy","curriculum","reading"],
-    "FCS":          ["fragile","conflict","fcs","post-conflict","humanitarian","displacement"],
-}
-
-def detect_domain(question: str) -> str:
-    q = question.lower()
-    for domain, keywords in DOMAIN_KEYWORDS.items():
-        if any(k in q for k in keywords):
-            return domain
-    return "General"
-
-# ── Quality auto-scorer ───────────────────────────────────────────────────────
+# ── Quality scorer ────────────────────────────────────────────────────────────
 def auto_score(answer: str, sources: list) -> dict:
-    """
-    Lightweight heuristic scoring based on RAGBench TRACe framework.
-    In production you'd call GPT to score — this keeps latency low.
-    """
     has_sources    = len(sources) > 0
     answer_len     = len(answer.split())
-    has_numbers    = any(c.isdigit() for c in answer)
-    has_caveats    = any(w in answer.lower() for w in ["however","but","note","caveat","uncertain"])
-    source_variety = len(set(s.get("source","") for s in sources))
-
-    relevance    = min(100, 70 + (answer_len // 20) + (10 if has_sources else 0))
-    grounding    = min(100, 60 + (source_variety * 10) + (15 if has_sources else 0))
-    completeness = min(100, 65 + (answer_len // 15) + (5 if has_numbers else 0))
-    avg          = round((relevance + grounding + completeness) / 3, 1)
-    hallucination_flag = avg < 72 or not has_sources
-
+    source_variety = len(set(s.get("source", "") for s in sources))
+    relevance      = min(100, 70 + (answer_len // 20) + (10 if has_sources else 0))
+    grounding      = min(100, 60 + (source_variety * 10) + (15 if has_sources else 0))
+    completeness   = min(100, 65 + (answer_len // 15))
+    avg            = round((relevance + grounding + completeness) / 3, 1)
     return {
-        "relevance_score":     round(relevance, 1),
-        "grounding_score":     round(grounding, 1),
-        "completeness_score":  round(completeness, 1),
-        "avg_trace_score":     avg,
-        "hallucination_flag":  hallucination_flag,
+        "relevance_score":    round(relevance, 1),
+        "grounding_score":    round(grounding, 1),
+        "completeness_score": round(completeness, 1),
+        "avg_trace_score":    avg,
+        "hallucination_flag": avg < 72 or not has_sources,
     }
 
-# ── Logger ────────────────────────────────────────────────────────────────────
-def log_query(question: str, answer: str, sources: list,
-              latency: float, session_id: str, model: str):
+def detect_domain(question: str) -> str:
+    from pipeline import detect_domain as _dd
+    return _dd(question)
+
+def log_query(question, answer, sources, latency, session_id, model, domain):
     if not supabase:
         return
     try:
         scores = auto_score(answer, sources)
         supabase.table("query_logs").insert({
             "question":           question,
-            "answer":             answer[:1000],   # trim very long answers
-            "domain":             detect_domain(question),
+            "answer":             answer[:1000],
+            "domain":             domain,
             "sources_count":      len(sources),
             "latency_sec":        round(latency, 2),
             "relevance_score":    scores["relevance_score"],
@@ -93,35 +70,29 @@ def log_query(question: str, answer: str, sources: list,
     except Exception as e:
         print(f"[WARN] Supabase log failed: {e}")
 
-# ── Agent singleton ───────────────────────────────────────────────────────────
+# ── Agent singleton (legacy RAG for uploads) ──────────────────────────────────
 _agent: SectorAgent | None = None
-
-def get_agent() -> SectorAgent:
-    if _agent is None:
-        raise HTTPException(status_code=503, detail="Agent not initialized.")
-    return _agent
 
 # ── Startup ───────────────────────────────────────────────────────────────────
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global _agent, supabase
     supabase = get_supabase()
-    api_key = os.getenv("OPENAI_API_KEY", "")
+    api_key  = os.getenv("OPENAI_API_KEY", "")
     if api_key:
-        print("[INFO] Auto-initializing agent...")
-        config = AgentConfig(openai_api_key=api_key)
-        _agent = SectorAgent(config)
+        print("[INFO] Pre-loading FAISS vector store…")
+        get_vectorstore()
+        config  = AgentConfig(openai_api_key=api_key)
+        _agent  = SectorAgent(config)
         _agent.initialize()
-        print("[INFO] Agent ready!")
-    else:
-        print("[WARN] No OPENAI_API_KEY — agent not initialized.")
+        print("[INFO] Sector AI Agent (multi-agent edition) ready!")
     yield
 
 # ── App ───────────────────────────────────────────────────────────────────────
 app = FastAPI(
-    title="Sector AI Agent API",
-    description="World Bank ITSEF-style RAG agent with Supabase observability",
-    version="2.0.0",
+    title="Sector AI Agent API — Multi-Agent Edition",
+    description="LangGraph 5-agent pipeline with real FAISS retrieval + Supabase observability",
+    version="3.0.0",
     lifespan=lifespan,
 )
 app.add_middleware(
@@ -131,17 +102,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ── Request models ────────────────────────────────────────────────────────────
-class InitRequest(BaseModel):
-    openai_api_key: str
-    llm_model: str = "gpt-4o-mini"
-    chunk_size: int = 800
-    retriever_k: int = 5
-    force_rebuild: bool = False
-
+# ── Models ────────────────────────────────────────────────────────────────────
 class QueryRequest(BaseModel):
     question: str
     session_id: str = ""
+    use_pipeline: bool = True   # True = multi-agent, False = legacy RAG
 
 class AddDocRequest(BaseModel):
     text: str
@@ -150,41 +115,47 @@ class AddDocRequest(BaseModel):
     doc_type: str = "Manual Entry"
 
 # ── Endpoints ─────────────────────────────────────────────────────────────────
-@app.post("/init")
-def initialize(req: InitRequest):
-    global _agent
-    config = AgentConfig(
-        openai_api_key=req.openai_api_key,
-        llm_model=req.llm_model,
-        chunk_size=req.chunk_size,
-        retriever_k=req.retriever_k,
-    )
-    _agent = SectorAgent(config)
-    return _agent.initialize(force_rebuild=req.force_rebuild)
-
-
 @app.post("/query")
 def query(req: QueryRequest):
-    agent = get_agent()
     session_id = req.session_id or str(uuid.uuid4())[:8]
     t0 = time.time()
+
     try:
-        result = agent.query(req.question)
-        latency = time.time() - t0
+        if req.use_pipeline:
+            # ── Multi-agent LangGraph pipeline ──
+            result  = run_pipeline(req.question)
+            latency = time.time() - t0
 
-        # Log to Supabase in background
-        log_query(
-            question=req.question,
-            answer=result["answer"],
-            sources=result.get("sources", []),
-            latency=latency,
-            session_id=session_id,
-            model=agent.config.llm_model,
-        )
+            sources = [
+                {"source": d["source"], "page": d["page"], "snippet": d["snippet"]}
+                for d in result["retrieved_docs"]
+            ]
 
-        result["session_id"] = session_id
-        result["latency_sec"] = round(latency, 2)
-        return result
+            log_query(req.question, result["final_answer"], sources,
+                      latency, session_id, "gpt-4o-mini", result["domain"])
+
+            return {
+                "answer":        result["final_answer"],
+                "sources":       sources,
+                "domain":        result["domain"],
+                "risks":         result["risks"],
+                "agent_trace":   result["agent_trace"],
+                "session_id":    session_id,
+                "latency_sec":   round(latency, 2),
+                "pipeline_mode": "multi-agent",
+            }
+        else:
+            # ── Legacy single RAG chain ──
+            if not _agent or not _agent.chain:
+                raise HTTPException(status_code=503, detail="Agent not initialized")
+            result  = _agent.query(req.question)
+            latency = time.time() - t0
+            log_query(req.question, result["answer"], result.get("sources", []),
+                      latency, session_id, "gpt-4o-mini", detect_domain(req.question))
+            result["session_id"]    = session_id
+            result["latency_sec"]   = round(latency, 2)
+            result["pipeline_mode"] = "single-rag"
+            return result
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -192,61 +163,66 @@ def query(req: QueryRequest):
 
 @app.post("/add-document")
 def add_document(req: AddDocRequest):
-    agent = get_agent()
-    meta = {"source": req.title, "sector": req.sector, "type": req.doc_type, "page": "N/A"}
-    return agent.add_document_text(req.text, meta)
+    if not _agent:
+        raise HTTPException(status_code=503, detail="Agent not initialized")
+    meta   = {"source": req.title, "sector": req.sector, "type": req.doc_type, "page": "N/A"}
+    result = _agent.add_document_text(req.text, meta)
+    # Reload vectorstore for pipeline
+    global _vectorstore
+    from pipeline import _vectorstore as pv
+    _vectorstore = None
+    return result
 
 
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
-    agent = get_agent()
+    if not _agent:
+        raise HTTPException(status_code=503, detail="Agent not initialized")
     content = await file.read()
-    text = content.decode("utf-8", errors="replace")
-    meta = {"source": file.filename, "sector": "Uploaded", "type": "Upload", "page": "N/A"}
-    result = agent.add_document_text(text, meta)
+    text    = content.decode("utf-8", errors="replace")
+    meta    = {"source": file.filename, "sector": "Uploaded", "type": "Upload", "page": "N/A"}
+    result  = _agent.add_document_text(text, meta)
     return {"filename": file.filename, **result}
 
 
 @app.post("/reset")
-def reset_conversation():
-    get_agent().reset_conversation()
-    return {"status": "conversation reset"}
+def reset():
+    if _agent:
+        _agent.reset_conversation()
+    return {"status": "reset"}
 
 
 @app.get("/health")
 def health():
     return {
-        "status": "ok",
-        "agent_ready": _agent is not None and _agent.chain is not None,
+        "status":          "ok",
+        "agent_ready":     _agent is not None,
         "logging_enabled": supabase is not None,
+        "pipeline_mode":   "multi-agent (LangGraph)",
     }
 
 
 @app.get("/stats")
 def stats():
-    """Return live stats from Supabase for the dashboard."""
     if not supabase:
         raise HTTPException(status_code=503, detail="Supabase not configured")
     try:
         result = supabase.table("query_logs").select(
             "id, created_at, domain, latency_sec, avg_trace_score, hallucination_flag, sources_count"
         ).order("created_at", desc=True).limit(500).execute()
-        rows = result.data
+        rows  = result.data
         total = len(rows)
         if total == 0:
             return {"total_queries": 0, "rows": []}
-
-        avg_latency   = round(sum(r["latency_sec"] or 0 for r in rows) / total, 2)
-        avg_trace     = round(sum(r["avg_trace_score"] or 0 for r in rows) / total, 1)
-        hall_count    = sum(1 for r in rows if r["hallucination_flag"])
-        hall_rate     = round(hall_count / total * 100, 1)
-
+        avg_latency = round(sum(r["latency_sec"] or 0 for r in rows) / total, 2)
+        avg_trace   = round(sum(r["avg_trace_score"] or 0 for r in rows) / total, 1)
+        hall_rate   = round(sum(1 for r in rows if r["hallucination_flag"]) / total * 100, 1)
         return {
-            "total_queries":       total,
-            "avg_latency_sec":     avg_latency,
-            "avg_trace_score":     avg_trace,
-            "hallucination_rate":  hall_rate,
-            "rows":                rows[-100:],  # last 100 for charting
+            "total_queries":      total,
+            "avg_latency_sec":    avg_latency,
+            "avg_trace_score":    avg_trace,
+            "hallucination_rate": hall_rate,
+            "rows":               rows[-100:],
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -254,7 +230,7 @@ def stats():
 
 @app.get("/")
 def root():
-    return {"message": "Sector AI Agent API v2.0 — visit /docs for Swagger UI"}
+    return {"message": "Sector AI Agent API v3.0 — Multi-Agent Edition · /docs for Swagger"}
 
 
 if __name__ == "__main__":
