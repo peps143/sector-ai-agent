@@ -501,27 +501,16 @@
   <!-- Setup -->
   <div class="sidebar-section">
     <div class="sidebar-label">⚙ Configuration</div>
-    <div class="form-group">
-      <label>OpenAI API Key</label>
-      <input type="password" id="api-key" placeholder="sk-..." />
+    <input type="hidden" id="api-key" value="" />
+    <input type="hidden" id="llm-model" value="gpt-4o-mini" />
+    <input type="hidden" id="chunk-size" value="800" />
+    <input type="hidden" id="retriever-k" value="5" />
+    <div style="font-size:11px;color:var(--text3);font-family:var(--mono);line-height:1.8;padding:4px 0 8px;">
+      <span style="color:var(--green)">●</span> Powered by GPT-4o-mini<br>
+      <span style="color:var(--accent2)">●</span> FAISS Vector Search<br>
+      <span style="color:var(--gold2)">●</span> LangChain RAG Pipeline
     </div>
-    <div class="form-group">
-      <label>LLM Model</label>
-      <select id="llm-model">
-        <option value="gpt-4o-mini">gpt-4o-mini (fast)</option>
-        <option value="gpt-4o">gpt-4o (quality)</option>
-        <option value="gpt-4-turbo">gpt-4-turbo</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label>Chunk Size</label>
-      <input type="number" id="chunk-size" value="800" min="200" max="2000" />
-    </div>
-    <div class="form-group">
-      <label>Retriever k</label>
-      <input type="number" id="retriever-k" value="5" min="1" max="20" />
-    </div>
-    <button class="btn btn-primary" id="init-btn" onclick="initAgent()">Initialize Agent</button>
+    <button class="btn btn-primary" id="init-btn" style="display:none">Initialize Agent</button>
     <button class="btn btn-ghost" onclick="resetConversation()">↺ Reset Conversation</button>
   </div>
 
@@ -663,23 +652,42 @@
 
 <script>
 const API_BASE = 'https://sector-ai-agent.onrender.com';
- // Auto-initialize on page load
-window.addEventListener('load', () => setTimeout(initAgentAuto, 1000));
+let agentReady = false;
 
-async function initAgentAuto() {
+// Auto-connect on page load
+window.addEventListener('load', () => setTimeout(autoConnect, 1500));
+
+async function autoConnect() {
   try {
-    const res = await fetch(`${API_BASE}/health`);
+    setStatus('loading');
+    const res = await fetch(API_BASE + '/health');
     const data = await res.json();
     if (data.agent_ready) {
       agentReady = true;
       setStatus('ready');
       document.getElementById('send-btn').disabled = false;
       activatePipelineSteps();
-      document.getElementById('welcome-screen') && null;
+      showToast('Agent ready — knowledge base loaded ✓', 'success');
+    } else {
+      // Try to initialize it
+      const res2 = await fetch(API_BASE + '/init', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({openai_api_key: 'auto', llm_model: 'gpt-4o-mini', chunk_size: 800, retriever_k: 5})
+      });
+      if (res2.ok) {
+        agentReady = true;
+        setStatus('ready');
+        document.getElementById('send-btn').disabled = false;
+        activatePipelineSteps();
+        showToast('Agent ready ✓', 'success');
+      }
     }
-  } catch(e) {}
+  } catch(e) {
+    setStatus('not_init');
+    showToast('Backend waking up... refresh in 60s', 'error');
+  }
 }
-let agentReady = false;
 let isLoading = false;
 
 // ── Utility ────────────────────────────────────────────────────────────────
@@ -790,12 +798,12 @@ async function sendQuery() {
     const res = await fetch(`${API_BASE}/query`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question }),
+      body: JSON.stringify({ question, use_pipeline: true }),
     });
     if (!res.ok) throw new Error(await res.text());
     const data = await res.json();
     thinkingEl.remove();
-    appendAgentMessage(data.answer, data.sources || []);
+    appendAgentMessage(data.answer, data.sources || [], data.agent_trace || [], data.risks || [], data.domain || '');
     setStatus('ready');
   } catch (err) {
     thinkingEl.remove();
@@ -823,21 +831,65 @@ function appendMessage(role, text) {
   return div;
 }
 
-function appendAgentMessage(answer, sources) {
+function appendAgentMessage(answer, sources, trace, risks, domain) {
   const chat = document.getElementById('chat-area');
   const div = document.createElement('div');
   div.className = 'message system';
 
+  // Sources
   let sourcesHtml = '';
-  if (sources.length) {
+  if (sources && sources.length) {
     const cards = sources.slice(0, 4).map(s => `
       <div class="source-card">
-        <div class="source-file">📄 ${s.source.split('/').pop()} · p.${s.page}</div>
-        <div class="source-snippet">${escapeHtml(s.snippet)}</div>
-      </div>
-    `).join('');
+        <div class="source-file">📄 ${s.source ? s.source.split('/').pop() : 'Document'} · p.${s.page || 'N/A'}</div>
+        <div class="source-snippet">${escapeHtml(s.snippet || '')}</div>
+      </div>`).join('');
     sourcesHtml = `<div class="sources">
       <div class="sources-label">Retrieved Sources (${sources.length})</div>
+      ${cards}
+    </div>`;
+  }
+
+  // Agent trace
+  let traceHtml = '';
+  if (trace && trace.length) {
+    const steps = trace.map((t,i) => `
+      <div style="display:flex;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);font-size:11px">
+        <span style="color:var(--gold2);font-family:var(--mono);min-width:18px">0${i+1}</span>
+        <div>
+          <div style="color:var(--accent2);font-family:var(--mono);font-size:10px;margin-bottom:1px">${t.agent}</div>
+          <div style="color:var(--text2)">${escapeHtml(t.output_summary)}</div>
+          <div style="color:var(--text3);font-family:var(--mono);font-size:9px">${t.duration_ms}ms</div>
+        </div>
+      </div>`).join('');
+    traceHtml = `<div style="margin-top:12px;border-top:1px solid var(--border);padding-top:10px">
+      <div style="font-size:10px;font-family:var(--mono);color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">
+        ⚡ Agent Trace${domain ? ' · ' + domain : ''}
+      </div>
+      ${steps}
+    </div>`;
+  }
+
+  // Risks
+  let risksHtml = '';
+  if (risks && risks.length) {
+    const SEVERITY_COLORS = {High:'#ff6b6b', Medium:'#ffb347', Low:'#4ecb8d'};
+    const cards = risks.map(r => `
+      <div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px">
+        <span style="font-family:var(--mono);font-size:9px;padding:2px 6px;border-radius:2px;
+          background:rgba(255,255,255,0.05);color:${SEVERITY_COLORS[r.severity]||'#888'};
+          border:1px solid ${SEVERITY_COLORS[r.severity]||'#888'};flex-shrink:0;height:fit-content">
+          ${r.severity}
+        </span>
+        <div>
+          <div style="font-weight:600;margin-bottom:2px">${escapeHtml(r.risk)}</div>
+          <div style="color:var(--text2);font-style:italic;font-size:11px">${escapeHtml(r.mitigation)}</div>
+        </div>
+      </div>`).join('');
+    risksHtml = `<div style="margin-top:12px;border-top:1px solid var(--border);padding-top:10px">
+      <div style="font-size:10px;font-family:var(--mono);color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">
+        ⚠️ Risk Assessment (${risks.length} risks)
+      </div>
       ${cards}
     </div>`;
   }
@@ -847,6 +899,8 @@ function appendAgentMessage(answer, sources) {
     <div class="bubble">
       <div style="white-space:pre-wrap;word-wrap:break-word">${escapeHtml(answer)}</div>
       ${sourcesHtml}
+      ${traceHtml}
+      ${risksHtml}
     </div>
   `;
   chat.appendChild(div);
@@ -861,7 +915,7 @@ function appendThinking() {
     <div class="avatar agent">🌐</div>
     <div class="thinking">
       <div class="thinking-dots"><span></span><span></span><span></span></div>
-      <span style="font-size:11px">Retrieving from knowledge base…</span>
+      <span style="font-size:11px">Running 5-agent pipeline…</span>
     </div>
   `;
   chat.appendChild(div);
