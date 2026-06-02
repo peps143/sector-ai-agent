@@ -508,7 +508,7 @@
     <div style="font-size:11px;color:var(--text3);font-family:var(--mono);line-height:1.8;padding:4px 0 8px;">
       <span style="color:var(--green)">●</span> Powered by GPT-4o-mini<br>
       <span style="color:var(--accent2)">●</span> FAISS Vector Search<br>
-      <span style="color:var(--gold2)">●</span> LangChain RAG Pipeline
+      <span style="color:var(--gold2)">●</span> LangGraph Multi-Agent Pipeline
     </div>
     <button class="btn btn-primary" id="init-btn" style="display:none">Initialize Agent</button>
     <button class="btn btn-ghost" onclick="resetConversation()">↺ Reset Conversation</button>
@@ -516,30 +516,26 @@
 
   <!-- RAG Pipeline Viz -->
   <div class="sidebar-section">
-    <div class="sidebar-label">⬡ RAG Pipeline</div>
+    <div class="sidebar-label">⬡ Agent Pipeline</div>
     <div style="font-size: 11px; color: var(--text3); font-family: var(--mono); line-height: 2;">
       <div id="step-ingest" style="display:flex;align-items:center;gap:6px;opacity:0.4">
-        <span style="color:var(--teal2)">①</span> Document Ingestion
+        <span style="color:var(--teal2)">①</span> Router Agent
       </div>
       <div style="color:var(--border2);padding-left:8px;font-size:9px">↓</div>
       <div id="step-chunk" style="display:flex;align-items:center;gap:6px;opacity:0.4">
-        <span style="color:var(--gold2)">②</span> Text Chunking
+        <span style="color:var(--gold2)">②</span> Retrieval Agent
       </div>
       <div style="color:var(--border2);padding-left:8px;font-size:9px">↓</div>
       <div id="step-embed" style="display:flex;align-items:center;gap:6px;opacity:0.4">
-        <span style="color:var(--accent2)">③</span> Embedding (Ada-3)
+        <span style="color:var(--accent2)">③</span> Reasoning Agent
       </div>
       <div style="color:var(--border2);padding-left:8px;font-size:9px">↓</div>
       <div id="step-index" style="display:flex;align-items:center;gap:6px;opacity:0.4">
-        <span style="color:var(--accent2)">④</span> FAISS Indexing
-      </div>
-      <div style="color:var(--border2);padding-left:8px;font-size:9px">↓</div>
-      <div id="step-mmr" style="display:flex;align-items:center;gap:6px;opacity:0.4">
-        <span style="color:var(--teal2)">⑤</span> MMR Retrieval
+        <span style="color:var(--accent2)">④</span> Risk Agent
       </div>
       <div style="color:var(--border2);padding-left:8px;font-size:9px">↓</div>
       <div id="step-gen" style="display:flex;align-items:center;gap:6px;opacity:0.4">
-        <span style="color:var(--green)">⑥</span> LLM Generation
+        <span style="color:var(--green)">⑤</span> Synthesis Agent
       </div>
     </div>
   </div>
@@ -605,7 +601,7 @@
   <div class="sidebar-section" style="margin-top:auto">
     <div class="sidebar-label">ℹ API Mode</div>
     <div style="font-size:11px;color:var(--text3);line-height:1.6;font-family:var(--mono)">
-      Frontend → FastAPI (port 8000) → LangChain → OpenAI.<br><br>
+      Frontend → FastAPI → LangGraph Pipeline → OpenAI.<br><br>
       Run <span style="color:var(--accent2)">uvicorn server:app</span> in <span style="color:var(--gold2)">/backend</span> to connect.
     </div>
   </div>
@@ -618,13 +614,13 @@
     <div class="welcome" id="welcome-screen">
       <div class="welcome-icon">🌐</div>
       <h1>World Bank Sector Knowledge Agent</h1>
-      <p>A RAG-powered domain agent that retrieves operational insights, lessons learned, and risk patterns from sector documents — simulating the ITSEF knowledge agent use case.</p>
+      <p>A LangGraph multi-agent system — Router, Retrieval, Reasoning, Risk, and Synthesis agents working together to surface grounded insights from sector documents.</p>
       <div class="pipeline-steps">
-        <span class="pipeline-step">LangChain</span>
+        <span class="pipeline-step">LangGraph</span>
         <span class="pipeline-arrow">→</span>
-        <span class="pipeline-step">FAISS Vector DB</span>
+        <span class="pipeline-step">FAISS Retrieval</span>
         <span class="pipeline-arrow">→</span>
-        <span class="pipeline-step">MMR Retrieval</span>
+        <span class="pipeline-step">5 Agents</span>
         <span class="pipeline-arrow">→</span>
         <span class="pipeline-step">GPT-4o-mini</span>
         <span class="pipeline-arrow">→</span>
