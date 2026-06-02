@@ -26,7 +26,7 @@ class AgentState(TypedDict):
     query:           str
     domain:          str
     retrieved_docs:  list[dict]
-    reasoning:       str
+    analysis:        str
     risks:           list[dict]
     final_answer:    str
     agent_trace:     list[dict]
@@ -197,7 +197,7 @@ Extract 4-5 key analytical insights relevant to the query, with evidence from th
         f"Generated {len(response.content.split(chr(10)))} lines of structured analysis",
         duration,
     )
-    return {**state, "reasoning": response.content, "current_agent": "risk", "agent_trace": state["agent_trace"] + [trace]}
+    return {**state, "analysis": response.content, "current_agent": "risk", "agent_trace": state["agent_trace"] + [trace]}
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -215,7 +215,7 @@ def risk_agent(state: AgentState) -> AgentState:
         No other text — just the JSON array."""),
         HumanMessage(content=f"""Query: {state['query']}
 Domain: {state['domain']}
-Analysis summary: {state['reasoning'][:600]}
+Analysis summary: {state['analysis'][:600]}
 
 Identify 3-4 key operational risks relevant to this query and context.""")
     ])
@@ -265,7 +265,7 @@ def synthesis_agent(state: AgentState) -> AgentState:
 Domain: {state['domain']}
 
 Reasoning Agent Analysis:
-{state['reasoning']}
+{state['analysis']}
 
 Risk Agent Findings:
 {risks_text}
@@ -314,7 +314,7 @@ def run_pipeline(query: str) -> AgentState:
         "query":          query,
         "domain":         "",
         "retrieved_docs": [],
-        "reasoning":      "",
+        "analysis":      "",
         "risks":          [],
         "final_answer":   "",
         "agent_trace":    [],
