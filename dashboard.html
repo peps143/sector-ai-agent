@@ -156,6 +156,21 @@ body{font-family:var(--body);background:var(--paper);color:var(--ink);min-height
     <div class="kpi"><div class="kpi-label">Loading…</div><div class="kpi-val">—</div></div>
   </div>
 
+
+  <!-- ROI + HITL PANEL -->
+  <div class="charts-2">
+    <div class="card">
+      <div class="card-title">ROI & time savings</div>
+      <div class="card-sub">Estimated analyst time recovered · live from query data</div>
+      <div id="roi-panel"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Human-in-the-loop flags</div>
+      <div class="card-sub">Responses flagged for low confidence · require human review</div>
+      <div id="hitl-panel"></div>
+    </div>
+  </div>
+
   <!-- ROW 1: Volume + Domain -->
   <div class="charts-2">
     <div class="card">
@@ -350,10 +365,12 @@ function renderAll(rows) {
   renderLatency(filtered);
   renderTrace(filtered);
   renderHall(filtered);
-  renderFeed(liveRows); // feed always live only
+  renderFeed(liveRows);
   renderFeatAdoption();
   renderLatTable(filtered);
   renderHeatmap(filtered);
+  renderROI(filtered);
+  renderHITL(filtered);
 }
 
 // ── KPIs ──────────────────────────────────────────────────────────────────────
@@ -576,6 +593,69 @@ function renderHeatmap(rows) {
     const idx=c.count===0?0:Math.min(4,Math.ceil(c.count/maxCount*4));
     return `<div class="hm-cell" style="background:${colors[idx]}" title="${c.date}: ${c.count} queries"></div>`;
   }).join('');
+}
+
+
+function renderROI(rows) {
+  const n = rows.length || 0;
+  const manualMinutes = 45;
+  const agentMinutes = 3;
+  const savedMin = n * (manualMinutes - agentMinutes);
+  const savedHrs = (savedMin / 60).toFixed(1);
+  const savedCost = Math.round(savedMin / 60 * 85);
+
+  document.getElementById('roi-panel').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+      <div style="background:var(--surface2);border-radius:4px;padding:10px 12px">
+        <div style="font-size:9px;font-family:var(--mono);color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Time saved</div>
+        <div style="font-size:22px;font-weight:700;font-family:var(--display);color:var(--green)">${savedHrs}h</div>
+        <div style="font-size:10px;color:var(--muted)">vs manual search</div>
+      </div>
+      <div style="background:var(--surface2);border-radius:4px;padding:10px 12px">
+        <div style="font-size:9px;font-family:var(--mono);color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Cost saving est.</div>
+        <div style="font-size:22px;font-weight:700;font-family:var(--display);color:var(--green)">$${savedCost.toLocaleString()}</div>
+        <div style="font-size:10px;color:var(--muted)">at $85/analyst hour</div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--muted);font-family:var(--mono);line-height:1.8;border-top:1px solid var(--border);padding-top:10px">
+      <div>Manual search: <span style="color:var(--text)">45 min/query</span></div>
+      <div>Agent response: <span style="color:var(--green)">3 min/query</span></div>
+      <div>Efficiency gain: <span style="color:var(--green)">93% faster</span></div>
+      <div>Total queries: <span style="color:var(--text)">${n}</span></div>
+    </div>
+  `;
+}
+
+function renderHITL(rows) {
+  const flagged = rows.filter(r => r.hallucination_flag);
+  const n = rows.length || 1;
+  const rate = (flagged.length / n * 100).toFixed(1);
+  const status = flagged.length / n > 0.05 ? 'Review recommended' : 'Within threshold';
+  const statusColor = flagged.length / n > 0.05 ? 'var(--red)' : 'var(--green)';
+
+  const recent = flagged.slice(-4);
+
+  document.getElementById('hitl-panel').innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface2);border-radius:4px;margin-bottom:12px;border-left:3px solid ${statusColor}">
+      <div style="font-size:22px;font-weight:700;font-family:var(--display);color:${statusColor}">${rate}%</div>
+      <div>
+        <div style="font-size:12px;color:var(--text);font-weight:600">${status}</div>
+        <div style="font-size:10px;color:var(--muted);font-family:var(--mono)">${flagged.length} of ${n} responses flagged</div>
+      </div>
+    </div>
+    <div style="font-size:9px;font-family:var(--mono);color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Recent flagged responses</div>
+    ${recent.length ? recent.map(r => `
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:11px">
+        <span style="color:var(--amber);font-size:14px">⚠</span>
+        <div>
+          <div style="color:var(--text);font-family:var(--mono);font-size:10px">${r.domain} · score ${r.avg_trace_score}</div>
+          <div style="color:var(--muted);font-size:10px">Recommend human review</div>
+        </div>
+      </div>`).join('') : '<div style="color:var(--muted);font-size:12px;font-family:var(--mono)">No flagged responses in this period</div>'}
+    <div style="margin-top:10px;padding:8px 10px;background:rgba(255,179,71,0.08);border:1px solid rgba(255,179,71,0.2);border-radius:4px;font-size:10px;color:var(--amber);font-family:var(--mono)">
+      ⚠ Threshold: flag rate > 5% triggers human review
+    </div>
+  `;
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
