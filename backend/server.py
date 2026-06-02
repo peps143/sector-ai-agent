@@ -228,6 +228,28 @@ def stats():
         raise HTTPException(status_code=500, detail=str(e))
 
 
+
+class FeedbackRequest(BaseModel):
+    rating: int        # 1 = thumbs up, -1 = thumbs down
+    message_id: str = ""
+    comment: str = ""
+
+
+@app.post("/feedback")
+def feedback(req: FeedbackRequest):
+    """Log user feedback (thumbs up/down) to Supabase."""
+    if supabase:
+        try:
+            supabase.table("feedback_logs").insert({
+                "rating":     req.rating,
+                "message_id": req.message_id,
+                "comment":    req.comment,
+            }).execute()
+        except Exception as e:
+            print(f"[WARN] Feedback log failed: {e}")
+    return {"status": "recorded", "rating": req.rating}
+
+
 @app.get("/")
 def root():
     return {"message": "Sector AI Agent API v3.0 — Multi-Agent Edition · /docs for Swagger"}
