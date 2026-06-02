@@ -28,14 +28,14 @@ class AgentState(TypedDict):
     query:            str
     domain:           str
     query_type:       str        # "standard" or "comparison"
-    domain_a:         str        # first sector for comparison
-    domain_b:         str        # second sector for comparison
+    sect_alpha:         str        # first sector for comparison
+    sect_beta:         str        # second sector for comparison
     retrieved_docs:   list[dict] # standard retrieval
-    docs_domain_a:    list[dict] # parallel: sector A docs
-    docs_domain_b:    list[dict] # parallel: sector B docs
+    docs_sect_alpha:    list[dict] # parallel: sector A docs
+    docs_sect_beta:    list[dict] # parallel: sector B docs
     analysis:         str        # standard reasoning output
-    insight_a:       str        # parallel: sector A analysis
-    insight_b:       str        # parallel: sector B analysis
+    output_alpha:       str        # parallel: sector A analysis
+    output_beta:       str        # parallel: sector B analysis
     comparison:       str        # comparison agent output
     risks:            list[dict]
     final_answer:     str
@@ -177,8 +177,8 @@ Confirm routing decision.""")
         **state,
         "domain":         domain,
         "query_type":     query_type,
-        "domain_a":       sector_a,
-        "domain_b":       sector_b,
+        "sect_alpha":       sector_a,
+        "sect_beta":       sector_b,
         "current_agent":  "branch",
         "agent_trace":    state.get("agent_trace", []) + [trace],
     }
@@ -190,7 +190,7 @@ Confirm routing decision.""")
 def sector_a_agent(state: AgentState) -> AgentState:
     t0 = time.time()
     llm = get_llm()
-    sector = state["domain_a"]
+    sector = state["sect_alpha"]
     query  = state["query"]
 
     docs = retrieve_for_sector(query, sector, k=3)
@@ -221,8 +221,8 @@ Summarize how {sector} projects handled this topic in 3-4 key points with eviden
     )
     return {
         **state,
-        "docs_domain_a": docs,
-        "insight_a":    response.content,
+        "docs_sect_alpha": docs,
+        "output_alpha":    response.content,
         "agent_trace":   state["agent_trace"] + [trace],
     }
 
@@ -233,7 +233,7 @@ Summarize how {sector} projects handled this topic in 3-4 key points with eviden
 def sector_b_agent(state: AgentState) -> AgentState:
     t0 = time.time()
     llm = get_llm()
-    sector = state["domain_b"]
+    sector = state["sect_beta"]
     query  = state["query"]
 
     docs = retrieve_for_sector(query, sector, k=3)
@@ -264,8 +264,8 @@ Summarize how {sector} projects handled this topic in 3-4 key points with eviden
     )
     return {
         **state,
-        "docs_domain_b": docs,
-        "insight_b":    response.content,
+        "docs_sect_beta": docs,
+        "output_beta":    response.content,
         "agent_trace":   state["agent_trace"] + [trace],
     }
 
@@ -342,8 +342,8 @@ def reasoning_agent(state: AgentState) -> AgentState:
 def comparison_agent(state: AgentState) -> AgentState:
     t0 = time.time()
     llm = get_llm()
-    sector_a = state["domain_a"]
-    sector_b = state["domain_b"]
+    sector_a = state["sect_alpha"]
+    sector_b = state["sect_beta"]
 
     response = llm.invoke([
         SystemMessage(content=f"""You are a Comparison Agent for a World Bank ITSEF knowledge system.
@@ -356,10 +356,10 @@ def comparison_agent(state: AgentState) -> AgentState:
         HumanMessage(content=f"""Query: {state['query']}
 
 {sector_a} Sector Analysis:
-{state['insight_a']}
+{state['output_alpha']}
 
 {sector_b} Sector Analysis:
-{state['insight_b']}
+{state['output_beta']}
 
 Provide a structured cross-sector comparison with transferable lessons.""")
     ])
@@ -373,13 +373,13 @@ Provide a structured cross-sector comparison with transferable lessons.""")
     )
 
     # Combine all docs for downstream agents
-    all_docs = state.get("docs_domain_a", []) + state.get("docs_domain_b", [])
+    all_docs = state.get("docs_sect_alpha", []) + state.get("docs_sect_beta", [])
 
     return {
         **state,
         "comparison":     response.content,
         "retrieved_docs": all_docs,
-        "analysis":       f"{sector_a} Analysis:\n{state['insight_a']}\n\n{sector_b} Analysis:\n{state['insight_b']}",
+        "analysis":       f"{sector_a} Analysis:\n{state['output_alpha']}\n\n{sector_b} Analysis:\n{state['output_beta']}",
         "current_agent":  "risk",
         "agent_trace":    state["agent_trace"] + [trace],
     }
@@ -439,11 +439,11 @@ def synthesis_agent(state: AgentState) -> AgentState:
     if state["query_type"] == "comparison":
         synthesis_input = f"""Query: {state['query']}
 
-{state['domain_a']} Analysis:
-{state.get('insight_a', '')}
+{state['sect_alpha']} Analysis:
+{state.get('output_alpha', '')}
 
-{state['domain_b']} Analysis:
-{state.get('insight_b', '')}
+{state['sect_beta']} Analysis:
+{state.get('output_beta', '')}
 
 Cross-Sector Comparison:
 {state.get('comparison', '')}
@@ -452,7 +452,7 @@ Risks:
 {risks_text}
 
 Sources: {sources}"""
-        instruction = f"Write a comprehensive comparative brief contrasting {state['domain_a']} and {state['domain_b']} approaches, with specific transferable lessons and recommendations."
+        instruction = f"Write a comprehensive comparative brief contrasting {state['sect_alpha']} and {state['sect_beta']} approaches, with specific transferable lessons and recommendations."
     else:
         synthesis_input = f"""Query: {state['query']}
 Domain: {state['domain']}
@@ -486,16 +486,16 @@ Sources: {sources}"""
 # ══════════════════════════════════════════════════════════════════════════════
 # ROUTING LOGIC
 # ══════════════════════════════════════════════════════════════════════════════
-def route_after_router(state: AgentState) -> Literal["retrieval", "domain_a", "domain_b"]:
+def route_after_router(state: AgentState) -> Literal["retrieval", "sect_alpha", "sect_beta"]:
     """After router: branch to parallel agents for comparison, or standard retrieval."""
     if state["query_type"] == "comparison":
-        return "domain_a"
+        return "sect_alpha"
     return "retrieval"
 
 
 def route_after_branches(state: AgentState) -> Literal["comparison", "reasoning"]:
     """After both sector agents complete: go to comparison or standard reasoning."""
-    if state["query_type"] == "comparison" and state.get("insight_a") and state.get("insight_b"):
+    if state["query_type"] == "comparison" and state.get("output_alpha") and state.get("output_beta"):
         return "comparison"
     return "reasoning"
 
@@ -509,8 +509,8 @@ def build_pipeline():
     # Add all agent nodes
     graph.add_node("router",     router_agent)
     graph.add_node("retrieval",  retrieval_agent)
-    graph.add_node("domain_a",   sector_a_agent)
-    graph.add_node("domain_b",   sector_b_agent)
+    graph.add_node("sect_alpha",   sector_a_agent)
+    graph.add_node("sect_beta",   sector_b_agent)
     graph.add_node("reasoning",  reasoning_agent)
     graph.add_node("comparison", comparison_agent)
     graph.add_node("risk",       risk_agent)
@@ -525,7 +525,7 @@ def build_pipeline():
         route_after_router,
         {
             "retrieval": "retrieval",
-            "domain_a":  "domain_a",
+            "sect_alpha":  "sect_alpha",
         }
     )
 
@@ -535,9 +535,9 @@ def build_pipeline():
 
     # Comparison path — sector_a runs first, then sector_b sequentially
     # (LangGraph free tier doesn't support true parallel; sequential is equivalent)
-    graph.add_edge("domain_a", "domain_b")
+    graph.add_edge("sect_alpha", "sect_beta")
     graph.add_conditional_edges(
-        "domain_b",
+        "sect_beta",
         route_after_branches,
         {
             "comparison": "comparison",
@@ -559,14 +559,14 @@ def run_pipeline(query: str) -> AgentState:
         "query":          query,
         "domain":         "",
         "query_type":     "standard",
-        "domain_a":       "",
-        "domain_b":       "",
+        "sect_alpha":       "",
+        "sect_beta":       "",
         "retrieved_docs": [],
-        "docs_domain_a":  [],
-        "docs_domain_b":  [],
+        "docs_sect_alpha":  [],
+        "docs_sect_beta":  [],
         "analysis":       "",
-        "insight_a":     "",
-        "insight_b":     "",
+        "output_alpha":     "",
+        "output_beta":     "",
         "comparison":     "",
         "risks":          [],
         "final_answer":   "",
@@ -592,7 +592,7 @@ if __name__ == "__main__":
         print(f"  [{step['agent']}] {step['duration_ms']}ms — {step['output_summary'][:80]}")
 
     if result["query_type"] == "comparison":
-        print(f"\n🔀 Sectors compared: {result['domain_a']} vs {result['domain_b']}")
+        print(f"\n🔀 Sectors compared: {result['sect_alpha']} vs {result['sect_beta']}")
 
     print(f"\n⚠️  RISKS:")
     for r in result["risks"]:
