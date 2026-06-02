@@ -453,6 +453,19 @@
     font-family: var(--mono);
   }
 
+
+  /* Feedback */
+  .feedback-row{display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border)}
+  .feedback-label{font-size:10px;font-family:var(--mono);color:var(--text3);letter-spacing:0.5px;text-transform:uppercase}
+  .feedback-btn{background:transparent;border:1px solid var(--border2);border-radius:4px;padding:4px 10px;cursor:pointer;font-size:13px;color:var(--text2);transition:all 0.15s}
+  .feedback-btn:hover{background:var(--bg3);color:var(--text)}
+  .feedback-btn.selected-up{border-color:var(--green);color:var(--green);background:rgba(46,160,67,0.08)}
+  .feedback-btn.selected-down{border-color:var(--red);color:var(--red);background:rgba(218,54,51,0.08)}
+  .feedback-thanks{font-size:11px;font-family:var(--mono);color:var(--green)}
+  .hitl-warning{display:flex;align-items:flex-start;gap:8px;background:rgba(210,153,34,0.1);border:1px solid rgba(210,153,34,0.3);border-radius:6px;padding:10px 12px;margin-top:10px}
+  .hitl-icon{font-size:16px;flex-shrink:0}
+  .hitl-text{font-size:12px;color:var(--gold2);line-height:1.5}
+
   /* Toast */
   #toast {
     position: fixed;
@@ -890,6 +903,18 @@ function appendAgentMessage(answer, sources, trace, risks, domain) {
     </div>`;
   }
 
+  const msgId = 'msg-' + Date.now();
+
+  // HITL warning if low confidence
+  const avgScore = trace && trace.length ?
+    Math.round(trace.reduce((a,t) => a + (t.duration_ms > 0 ? 1 : 0), 0)) : 0;
+  const isLowConf = answer.length < 200 || (trace && trace.length === 0);
+  const hitlHtml = isLowConf ? `
+    <div class="hitl-warning">
+      <span class="hitl-icon">⚠️</span>
+      <div class="hitl-text"><strong>Low confidence response</strong> — recommend human review before acting on this insight. Verify sources independently.</div>
+    </div>` : '';
+
   div.innerHTML = `
     <div class="avatar agent">🌐</div>
     <div class="bubble">
@@ -897,6 +922,12 @@ function appendAgentMessage(answer, sources, trace, risks, domain) {
       ${sourcesHtml}
       ${traceHtml}
       ${risksHtml}
+      ${hitlHtml}
+      <div class="feedback-row" id="${msgId}">
+        <span class="feedback-label">Was this helpful?</span>
+        <button class="feedback-btn" onclick="submitFeedback('${msgId}', 1, this)" title="Yes, helpful">👍</button>
+        <button class="feedback-btn" onclick="submitFeedback('${msgId}', -1, this)" title="Not helpful">👎</button>
+      </div>
     </div>
   `;
   chat.appendChild(div);
@@ -917,6 +948,30 @@ function appendThinking() {
   chat.appendChild(div);
   chat.scrollTop = chat.scrollHeight;
   return div;
+}
+
+async function submitFeedback(msgId, rating, btn) {
+  const row = document.getElementById(msgId);
+  if (!row) return;
+
+  // Visual feedback immediately
+  const btns = row.querySelectorAll('.feedback-btn');
+  btns.forEach(b => b.classList.remove('selected-up','selected-down'));
+  btn.classList.add(rating === 1 ? 'selected-up' : 'selected-down');
+
+  // Log to backend
+  try {
+    await fetch(`${API_BASE}/feedback`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ rating, message_id: msgId }),
+    });
+  } catch(e) { /* silent fail */ }
+
+  // Show thanks
+  setTimeout(() => {
+    row.innerHTML = '<span class="feedback-thanks">✓ Thanks for your feedback</span>';
+  }, 600);
 }
 
 function escapeHtml(str) {
