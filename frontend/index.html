@@ -8,514 +8,155 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet" />
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
   :root {
-    --bg: #0d1117;
-    --bg2: #161b22;
-    --bg3: #21262d;
-    --surface: #1c2128;
-    --border: rgba(255,255,255,0.08);
-    --border2: rgba(255,255,255,0.14);
-    --text: #e6edf3;
-    --text2: #8b949e;
-    --text3: #6e7681;
-    --accent: #1f6feb;
-    --accent2: #388bfd;
-    --gold: #d29922;
-    --gold2: #e3b341;
-    --teal: #1b786e;
-    --teal2: #3bada1;
-    --green: #2ea043;
-    --red: #da3633;
-    --mono: 'IBM Plex Mono', monospace;
-    --sans: 'DM Sans', sans-serif;
-    --serif: 'Playfair Display', serif;
-    --radius: 8px;
-    --radius-lg: 12px;
-    --shadow: 0 8px 32px rgba(0,0,0,0.4);
+    --bg:#0d1117;--bg2:#161b22;--bg3:#21262d;--surface:#1c2128;
+    --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);
+    --text:#e6edf3;--text2:#8b949e;--text3:#6e7681;
+    --accent:#1f6feb;--accent2:#388bfd;
+    --gold:#d29922;--gold2:#e3b341;
+    --teal:#1b786e;--teal2:#3bada1;
+    --green:#2ea043;--red:#da3633;--amber:#e3b341;--purple:#8957e5;
+    --mono:'IBM Plex Mono',monospace;
+    --sans:'DM Sans',sans-serif;
+    --serif:'Playfair Display',serif;
+    --radius:8px;--radius-lg:12px;
   }
-
-  body {
-    font-family: var(--sans);
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    display: grid;
-    grid-template-columns: 300px 1fr;
-    grid-template-rows: auto 1fr;
-  }
-
-  /* ── HEADER ────────────────────────────────────────────────────── */
-  header {
-    grid-column: 1 / -1;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 0 24px;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-  .header-brand {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .header-logo {
-    width: 32px;
-    height: 32px;
-    background: linear-gradient(135deg, var(--accent) 0%, var(--teal2) 100%);
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-  }
-  .header-title {
-    font-family: var(--serif);
-    font-size: 18px;
-    font-weight: 700;
-    letter-spacing: -0.3px;
-  }
-  .header-subtitle {
-    font-size: 11px;
-    color: var(--text3);
-    font-family: var(--mono);
-    letter-spacing: 0.5px;
-  }
-  .header-status {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 12px;
-    color: var(--text2);
-    font-family: var(--mono);
-  }
-  .status-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--text3);
-    transition: background 0.3s;
-  }
-  .status-dot.ready { background: var(--green); box-shadow: 0 0 6px var(--green); }
-  .status-dot.loading { background: var(--gold2); animation: pulse 1s infinite; }
-  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
-
-  /* ── SIDEBAR ───────────────────────────────────────────────────── */
-  .sidebar {
-    background: var(--bg2);
-    border-right: 1px solid var(--border);
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-  }
-  .sidebar-section {
-    padding: 16px;
-    border-bottom: 1px solid var(--border);
-  }
-  .sidebar-label {
-    font-size: 10px;
-    font-family: var(--mono);
-    color: var(--text3);
-    letter-spacing: 1.2px;
-    text-transform: uppercase;
-    margin-bottom: 12px;
-  }
-
-  /* Setup form */
-  .form-group { margin-bottom: 12px; }
-  .form-group label {
-    display: block;
-    font-size: 11px;
-    color: var(--text2);
-    margin-bottom: 4px;
-    font-family: var(--mono);
-  }
-  .form-group input, .form-group select {
-    width: 100%;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 7px 10px;
-    border-radius: var(--radius);
-    font-size: 12px;
-    font-family: var(--mono);
-    outline: none;
-    transition: border-color 0.2s;
-  }
-  .form-group input:focus, .form-group select:focus {
-    border-color: var(--accent2);
-  }
-  .form-group input[type="password"] { letter-spacing: 2px; }
-
-  .btn {
-    width: 100%;
-    padding: 9px 16px;
-    border-radius: var(--radius);
-    font-family: var(--sans);
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    border: none;
-    transition: all 0.15s;
-  }
-  .btn-primary {
-    background: var(--accent);
-    color: #fff;
-  }
-  .btn-primary:hover { background: var(--accent2); }
-  .btn-primary:disabled { background: var(--bg3); color: var(--text3); cursor: not-allowed; }
-  .btn-ghost {
-    background: transparent;
-    border: 1px solid var(--border2);
-    color: var(--text2);
-    margin-top: 6px;
-  }
-  .btn-ghost:hover { border-color: var(--border2); background: var(--bg3); color: var(--text); }
-
-  /* Suggested queries */
-  .query-chip {
-    display: block;
-    width: 100%;
-    text-align: left;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    color: var(--text2);
-    padding: 8px 10px;
-    border-radius: var(--radius);
-    font-size: 11.5px;
-    font-family: var(--sans);
-    cursor: pointer;
-    margin-bottom: 6px;
-    line-height: 1.4;
-    transition: all 0.15s;
-  }
-  .query-chip:hover {
-    border-color: var(--accent);
-    color: var(--text);
-    background: rgba(31,111,235,0.08);
-  }
-  .chip-sector {
-    font-family: var(--mono);
-    font-size: 9px;
-    color: var(--gold2);
-    display: block;
-    margin-bottom: 2px;
-    letter-spacing: 0.5px;
-  }
-
-  /* Knowledge base panel */
-  .kb-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    padding: 8px 0;
-    border-bottom: 1px solid var(--border);
-    font-size: 11px;
-  }
-  .kb-item:last-child { border-bottom: none; }
-  .kb-icon {
-    width: 24px;
-    height: 24px;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
-    flex-shrink: 0;
-    margin-top: 1px;
-  }
-  .kb-icon.transport { background: rgba(31,111,235,0.15); color: var(--accent2); }
-  .kb-icon.agriculture { background: rgba(46,160,67,0.15); color: var(--green); }
-  .kb-icon.wash { background: rgba(59,173,161,0.15); color: var(--teal2); }
-  .kb-icon.education { background: rgba(210,153,34,0.15); color: var(--gold2); }
-  .kb-icon.fcs { background: rgba(218,54,51,0.15); color: #ff7b72; }
-  .kb-meta { color: var(--text3); font-family: var(--mono); }
-
-  /* Doc upload */
-  .upload-zone {
-    border: 1px dashed var(--border2);
-    border-radius: var(--radius);
-    padding: 14px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s;
-    font-size: 12px;
-    color: var(--text3);
-  }
-  .upload-zone:hover { border-color: var(--accent); color: var(--text2); background: rgba(31,111,235,0.05); }
-
-  /* ── MAIN CHAT ─────────────────────────────────────────────────── */
-  .main {
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-  .chat-area {
-    flex: 1;
-    overflow-y: auto;
-    padding: 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-
+  body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;display:grid;grid-template-columns:300px 1fr;grid-template-rows:auto 1fr}
+  /* HEADER */
+  header{grid-column:1/-1;background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+  .header-brand{display:flex;align-items:center;gap:12px}
+  .header-logo{width:32px;height:32px;background:linear-gradient(135deg,var(--accent) 0%,var(--teal2) 100%);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+  .header-title{font-family:var(--serif);font-size:18px;font-weight:700}
+  .header-subtitle{font-size:11px;color:var(--text3);font-family:var(--mono);letter-spacing:0.5px}
+  .header-status{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);font-family:var(--mono)}
+  .status-dot{width:8px;height:8px;border-radius:50%;background:var(--text3);transition:background 0.3s}
+  .status-dot.ready{background:var(--green);box-shadow:0 0 6px var(--green)}
+  .status-dot.loading{background:var(--gold2);animation:pulse 1s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+  /* SIDEBAR */
+  .sidebar{background:var(--bg2);border-right:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column}
+  .sidebar-section{padding:16px;border-bottom:1px solid var(--border)}
+  .sidebar-label{font-size:10px;font-family:var(--mono);color:var(--text3);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:12px}
+  .btn{width:100%;padding:9px 16px;border-radius:var(--radius);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all 0.15s}
+  .btn-primary{background:var(--accent);color:#fff}
+  .btn-primary:hover{background:var(--accent2)}
+  .btn-ghost{background:transparent;border:1px solid var(--border2);color:var(--text2);margin-top:6px}
+  .btn-ghost:hover{background:var(--bg3);color:var(--text)}
+  /* Pipeline steps */
+  .pipeline-step{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;color:var(--text3);line-height:2.2;opacity:0.4;transition:opacity 0.4s}
+  .pipeline-step.active{opacity:1}
+  .pipeline-arrow{color:var(--border2);padding-left:8px;font-size:9px}
+  /* Sample chips */
+  .query-chip{display:block;width:100%;text-align:left;background:var(--bg3);border:1px solid var(--border);color:var(--text2);padding:8px 10px;border-radius:var(--radius);font-size:11.5px;cursor:pointer;margin-bottom:6px;line-height:1.4;transition:all 0.15s}
+  .query-chip:hover{border-color:var(--accent);color:var(--text);background:rgba(31,111,235,0.08)}
+  .query-chip.highlight{border-color:rgba(227,179,65,0.4);background:rgba(227,179,65,0.05)}
+  .query-chip.highlight:hover{border-color:var(--gold2);background:rgba(227,179,65,0.08)}
+  .chip-sector{font-family:var(--mono);font-size:9px;color:var(--gold2);display:block;margin-bottom:2px;letter-spacing:0.5px}
+  /* KB items */
+  .kb-item{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);font-size:11px}
+  .kb-item:last-child{border-bottom:none}
+  .kb-icon{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;margin-top:1px}
+  .kb-meta{color:var(--text3);font-family:var(--mono)}
+  /* MAIN */
+  .main{display:flex;flex-direction:column;overflow:hidden}
+  .chat-area{flex:1;overflow-y:auto;padding:24px;display:flex;flex-direction:column;gap:20px}
   /* Welcome */
-  .welcome {
-    max-width: 640px;
-    margin: 40px auto;
-    text-align: center;
-  }
-  .welcome-icon {
-    width: 56px;
-    height: 56px;
-    background: linear-gradient(135deg, var(--accent) 0%, var(--teal2) 100%);
-    border-radius: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    margin: 0 auto 20px;
-  }
-  .welcome h1 {
-    font-family: var(--serif);
-    font-size: 28px;
-    font-weight: 700;
-    margin-bottom: 10px;
-    line-height: 1.25;
-  }
-  .welcome p { color: var(--text2); font-size: 14px; line-height: 1.6; }
-  .pipeline-steps {
-    display: flex;
-    gap: 6px;
-    align-items: center;
-    justify-content: center;
-    margin: 20px 0;
-    flex-wrap: wrap;
-  }
-  .pipeline-step {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 4px 12px;
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--text2);
-  }
-  .pipeline-arrow { color: var(--text3); font-size: 12px; }
-
+  .welcome{max-width:640px;margin:40px auto;text-align:center}
+  .welcome-icon{width:56px;height:56px;background:linear-gradient(135deg,var(--accent) 0%,var(--teal2) 100%);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 20px}
+  .welcome h1{font-family:var(--serif);font-size:28px;font-weight:700;margin-bottom:10px;line-height:1.25}
+  .welcome p{color:var(--text2);font-size:14px;line-height:1.6}
+  .pipeline-steps{display:flex;gap:6px;align-items:center;justify-content:center;margin:20px 0;flex-wrap:wrap}
+  .pipeline-step-badge{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-family:var(--mono);font-size:10px;color:var(--text2)}
+  .pipeline-arrow-badge{color:var(--text3);font-size:12px}
   /* Messages */
-  .message { display: flex; gap: 12px; max-width: 860px; }
-  .message.user { flex-direction: row-reverse; margin-left: auto; }
-  .message.system { flex-direction: row; margin-right: auto; }
-  .avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    flex-shrink: 0;
-  }
-  .avatar.agent {
-    background: linear-gradient(135deg, var(--accent) 0%, var(--teal2) 100%);
-  }
-  .avatar.user { background: var(--bg3); border: 1px solid var(--border2); }
-
-  .bubble {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 14px 16px;
-    font-size: 14px;
-    line-height: 1.65;
-    max-width: 720px;
-  }
-  .message.user .bubble {
-    background: rgba(31,111,235,0.12);
-    border-color: rgba(31,111,235,0.3);
-  }
-
-  /* Sources panel */
-  .sources {
-    margin-top: 12px;
-    border-top: 1px solid var(--border);
-    padding-top: 10px;
-  }
-  .sources-label {
-    font-size: 10px;
-    font-family: var(--mono);
-    color: var(--text3);
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    margin-bottom: 8px;
-  }
-  .source-card {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 8px 10px;
-    margin-bottom: 6px;
-    font-size: 11.5px;
-  }
-  .source-file {
-    font-family: var(--mono);
-    color: var(--accent2);
-    font-size: 10px;
-    margin-bottom: 4px;
-  }
-  .source-snippet { color: var(--text2); line-height: 1.45; }
-
-  /* Thinking indicator */
-  .thinking {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: var(--text3);
-    font-size: 13px;
-    font-family: var(--mono);
-    padding: 8px 0;
-  }
-  .thinking-dots span {
-    display: inline-block;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--accent2);
-    animation: bounce 1.2s infinite;
-  }
-  .thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
-  .thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
-  @keyframes bounce { 0%,80%,100% { transform: translateY(0); opacity: 0.4; } 40% { transform: translateY(-6px); opacity: 1; } }
-
-  /* ── INPUT BAR ─────────────────────────────────────────────────── */
-  .input-bar {
-    background: var(--surface);
-    border-top: 1px solid var(--border);
-    padding: 16px 24px;
-  }
-  .input-row {
-    display: flex;
-    gap: 10px;
-    align-items: flex-end;
-    max-width: 860px;
-  }
-  .input-wrap {
-    flex: 1;
-    background: var(--bg2);
-    border: 1px solid var(--border2);
-    border-radius: 10px;
-    transition: border-color 0.2s;
-    padding: 10px 14px;
-  }
-  .input-wrap:focus-within { border-color: var(--accent2); }
-  #query-input {
-    width: 100%;
-    background: transparent;
-    border: none;
-    outline: none;
-    color: var(--text);
-    font-family: var(--sans);
-    font-size: 14px;
-    resize: none;
-    min-height: 22px;
-    max-height: 120px;
-    line-height: 1.5;
-  }
-  #query-input::placeholder { color: var(--text3); }
-  .send-btn {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    background: var(--accent);
-    border: none;
-    color: #fff;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    flex-shrink: 0;
-    transition: background 0.15s, transform 0.1s;
-  }
-  .send-btn:hover { background: var(--accent2); }
-  .send-btn:active { transform: scale(0.94); }
-  .send-btn:disabled { background: var(--bg3); color: var(--text3); cursor: not-allowed; }
-  .input-hint {
-    margin-top: 6px;
-    font-size: 11px;
-    color: var(--text3);
-    font-family: var(--mono);
-  }
-
-
+  .message{display:flex;gap:12px;max-width:860px}
+  .message.user{flex-direction:row-reverse;margin-left:auto}
+  .message.system{flex-direction:row;margin-right:auto}
+  .avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+  .avatar.agent{background:linear-gradient(135deg,var(--accent) 0%,var(--teal2) 100%)}
+  .avatar.user{background:var(--bg3);border:1px solid var(--border2)}
+  .bubble{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;font-size:14px;line-height:1.65;max-width:720px}
+  .message.user .bubble{background:rgba(31,111,235,0.12);border-color:rgba(31,111,235,0.3)}
+  /* Sources */
+  .sources{margin-top:12px;border-top:1px solid var(--border);padding-top:10px}
+  .sources-label{font-size:10px;font-family:var(--mono);color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
+  .source-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px;margin-bottom:6px;font-size:11.5px}
+  .source-file{font-family:var(--mono);color:var(--accent2);font-size:10px;margin-bottom:4px}
+  .source-snippet{color:var(--text2);line-height:1.45}
+  /* Agent trace */
+  .trace-section{margin-top:12px;border-top:1px solid var(--border);padding-top:10px}
+  .trace-label{font-size:10px;font-family:var(--mono);color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
+  .trace-step{display:flex;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);font-size:11px}
+  .trace-step:last-child{border-bottom:none}
+  .trace-num{color:var(--gold2);font-family:var(--mono);min-width:20px;margin-top:1px}
+  .trace-agent{color:var(--accent2);font-family:var(--mono);font-size:10px;margin-bottom:1px}
+  .trace-out{color:var(--text2);line-height:1.4}
+  .trace-ms{color:var(--text3);font-family:var(--mono);font-size:9px;margin-top:1px}
+  /* Risks */
+  .risks-section{margin-top:12px;border-top:1px solid var(--border);padding-top:10px}
+  .risk-card{display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px}
+  .risk-card:last-child{border-bottom:none}
+  .risk-badge{font-family:var(--mono);font-size:8px;letter-spacing:1px;padding:2px 6px;border-radius:3px;flex-shrink:0;height:fit-content;text-transform:uppercase}
+  .badge-high{background:rgba(218,54,51,0.15);color:var(--red);border:1px solid rgba(218,54,51,0.3)}
+  .badge-medium{background:rgba(227,179,65,0.12);color:var(--amber);border:1px solid rgba(227,179,65,0.3)}
+  .badge-low{background:rgba(46,160,67,0.1);color:var(--green);border:1px solid rgba(46,160,67,0.2)}
+  .risk-name{font-weight:600;margin-bottom:2px}
+  .risk-mit{color:var(--text2);font-style:italic}
+  /* Validation */
+  .validation-section{margin-top:12px;border-top:1px solid var(--border);padding-top:10px}
+  .val-header{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .val-score{font-family:var(--mono);font-size:20px;font-weight:700}
+  .val-bar{height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;margin-bottom:8px}
+  .val-bar-fill{height:100%;border-radius:2px;transition:width 0.8s}
+  .val-badge{font-family:var(--mono);font-size:9px;padding:3px 8px;border-radius:3px;margin-left:auto;text-transform:uppercase;letter-spacing:1px}
+  .val-approved{background:rgba(46,160,67,0.12);color:var(--green);border:1px solid rgba(46,160,67,0.25)}
+  .val-review{background:rgba(227,179,65,0.12);color:var(--gold2);border:1px solid rgba(227,179,65,0.25)}
+  .val-human{background:rgba(218,54,51,0.12);color:var(--red);border:1px solid rgba(218,54,51,0.25)}
+  .val-claim{font-size:11px;padding:2px 0;display:flex;gap:6px}
+  /* HITL warning */
+  .hitl-warning{display:flex;align-items:flex-start;gap:8px;background:rgba(210,153,34,0.1);border:1px solid rgba(210,153,34,0.3);border-radius:6px;padding:10px 12px;margin-top:10px}
+  .hitl-text{font-size:12px;color:var(--gold2);line-height:1.5}
   /* Feedback */
   .feedback-row{display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border)}
   .feedback-label{font-size:10px;font-family:var(--mono);color:var(--text3);letter-spacing:0.5px;text-transform:uppercase}
   .feedback-btn{background:transparent;border:1px solid var(--border2);border-radius:4px;padding:4px 10px;cursor:pointer;font-size:13px;color:var(--text2);transition:all 0.15s}
-  .feedback-btn:hover{background:var(--bg3);color:var(--text)}
-  .feedback-btn.selected-up{border-color:var(--green);color:var(--green);background:rgba(46,160,67,0.08)}
-  .feedback-btn.selected-down{border-color:var(--red);color:var(--red);background:rgba(218,54,51,0.08)}
+  .feedback-btn:hover{background:var(--bg3)}
+  .feedback-btn.up{border-color:var(--green);color:var(--green);background:rgba(46,160,67,0.08)}
+  .feedback-btn.down{border-color:var(--red);color:var(--red);background:rgba(218,54,51,0.08)}
   .feedback-thanks{font-size:11px;font-family:var(--mono);color:var(--green)}
-  .hitl-warning{display:flex;align-items:flex-start;gap:8px;background:rgba(210,153,34,0.1);border:1px solid rgba(210,153,34,0.3);border-radius:6px;padding:10px 12px;margin-top:10px}
-  .hitl-icon{font-size:16px;flex-shrink:0}
-  .hitl-text{font-size:12px;color:var(--gold2);line-height:1.5}
-
-
-  /* Validation panel */
-  .validation-panel{margin-top:12px;border-top:1px solid var(--border);padding-top:12px}
-  .val-header{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-  .val-score{font-family:var(--mono);font-size:18px;font-weight:700}
-  .val-label{font-size:11px;font-family:var(--mono);color:var(--text3);letter-spacing:1px;text-transform:uppercase}
-  .val-badge{font-family:var(--mono);font-size:9px;padding:3px 8px;border-radius:3px;margin-left:auto;text-transform:uppercase;letter-spacing:1px}
-  .val-approved{background:rgba(46,160,67,0.12);color:var(--green);border:1px solid rgba(46,160,67,0.25)}
-  .val-review{background:rgba(210,153,34,0.12);color:var(--gold2);border:1px solid rgba(210,153,34,0.25)}
-  .val-human{background:rgba(218,54,51,0.12);color:var(--red);border:1px solid rgba(218,54,51,0.25)}
-  .val-bar{height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;margin-bottom:10px}
-  .val-bar-fill{height:100%;border-radius:2px;transition:width 0.8s}
-  .val-claims{font-size:11px;line-height:1.7}
-  .val-claim-good{color:var(--green)}
-  .val-claim-bad{color:var(--red)}
-
+  /* Thinking */
+  .thinking{display:flex;align-items:center;gap:8px;color:var(--text3);font-size:13px;font-family:var(--mono);padding:8px 0}
+  .thinking-dots span{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--accent2);animation:bounce 1.2s infinite}
+  .thinking-dots span:nth-child(2){animation-delay:0.2s}
+  .thinking-dots span:nth-child(3){animation-delay:0.4s}
+  @keyframes bounce{0%,80%,100%{transform:translateY(0);opacity:0.4}40%{transform:translateY(-6px);opacity:1}}
+  /* Input */
+  .input-bar{background:var(--surface);border-top:1px solid var(--border);padding:16px 24px}
+  .input-row{display:flex;gap:10px;align-items:flex-end;max-width:860px}
+  .input-wrap{flex:1;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;transition:border-color 0.2s;padding:10px 14px}
+  .input-wrap:focus-within{border-color:var(--accent2)}
+  #query-input{width:100%;background:transparent;border:none;outline:none;color:var(--text);font-family:var(--sans);font-size:14px;resize:none;min-height:22px;max-height:120px;line-height:1.5}
+  #query-input::placeholder{color:var(--text3)}
+  .send-btn{width:40px;height:40px;border-radius:10px;background:var(--accent);border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;transition:background 0.15s}
+  .send-btn:hover{background:var(--accent2)}
+  .send-btn:disabled{background:var(--bg3);color:var(--text3);cursor:not-allowed}
+  .input-hint{margin-top:6px;font-size:11px;color:var(--text3);font-family:var(--mono)}
   /* Toast */
-  #toast {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    background: var(--surface);
-    border: 1px solid var(--border2);
-    border-radius: var(--radius);
-    padding: 10px 16px;
-    font-size: 13px;
-    z-index: 1000;
-    transform: translateY(80px);
-    opacity: 0;
-    transition: all 0.3s;
-  }
-  #toast.show { transform: translateY(0); opacity: 1; }
-  #toast.error { border-color: var(--red); color: #ff7b72; }
-  #toast.success { border-color: var(--green); color: #56d364; }
-
-  /* Scrollbar */
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+  #toast{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:10px 16px;font-size:13px;z-index:1000;transform:translateY(80px);opacity:0;transition:all 0.3s}
+  #toast.show{transform:translateY(0);opacity:1}
+  #toast.error{border-color:var(--red);color:#ff7b72}
+  #toast.success{border-color:var(--green);color:#56d364}
+  ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
 <header>
   <div class="header-brand">
     <div class="header-logo">🌍</div>
     <div>
       <div class="header-title">Sector AI Agent</div>
-      <div class="header-subtitle">ITSEF Knowledge Retrieval System · v1.0</div>
+      <div class="header-subtitle">ITSEF Knowledge Retrieval System · v2.0 · 6-Agent Pipeline</div>
     </div>
   </div>
   <div class="header-status">
@@ -524,52 +165,39 @@
   </div>
 </header>
 
-<!-- SIDEBAR -->
 <aside class="sidebar">
 
-  <!-- Setup -->
+  <!-- Config -->
   <div class="sidebar-section">
     <div class="sidebar-label">⚙ Configuration</div>
     <input type="hidden" id="api-key" value="" />
-    <input type="hidden" id="llm-model" value="gpt-4o-mini" />
-    <input type="hidden" id="chunk-size" value="800" />
-    <input type="hidden" id="retriever-k" value="5" />
-    <div style="font-size:11px;color:var(--text3);font-family:var(--mono);line-height:1.8;padding:4px 0 8px;">
+    <div style="font-size:11px;color:var(--text3);font-family:var(--mono);line-height:1.8;padding:4px 0 8px">
       <span style="color:var(--green)">●</span> Powered by GPT-4o-mini<br>
       <span style="color:var(--accent2)">●</span> FAISS Vector Search<br>
       <span style="color:var(--gold2)">●</span> LangGraph Multi-Agent Pipeline
     </div>
-    <button class="btn btn-primary" id="init-btn" style="display:none">Initialize Agent</button>
     <button class="btn btn-ghost" onclick="resetConversation()">↺ Reset Conversation</button>
   </div>
 
-  <!-- RAG Pipeline Viz -->
+  <!-- Agent Pipeline -->
   <div class="sidebar-section">
     <div class="sidebar-label">⬡ Agent Pipeline (6)</div>
-    <div style="font-size: 11px; color: var(--text3); font-family: var(--mono); line-height: 2;">
-      <div id="step-ingest" style="display:flex;align-items:center;gap:6px;opacity:0.4">
-        <span style="color:var(--teal2)">①</span> Router Agent
-      </div>
-      <div style="color:var(--border2);padding-left:8px;font-size:9px">↓</div>
-      <div id="step-chunk" style="display:flex;align-items:center;gap:6px;opacity:0.4">
-        <span style="color:var(--gold2)">②</span> Retrieval Agent
-      </div>
-      <div style="color:var(--border2);padding-left:8px;font-size:9px">↓</div>
-      <div id="step-embed" style="display:flex;align-items:center;gap:6px;opacity:0.4">
-        <span style="color:var(--accent2)">③</span> Reasoning Agent
-      </div>
-      <div style="color:var(--border2);padding-left:8px;font-size:9px">↓</div>
-      <div id="step-index" style="display:flex;align-items:center;gap:6px;opacity:0.4">
-        <span style="color:var(--accent2)">④</span> Risk Agent
-      </div>
-      <div style="color:var(--border2);padding-left:8px;font-size:9px">↓</div>
-      <div id="step-gen" style="display:flex;align-items:center;gap:6px;opacity:0.4">
-        <span style="color:var(--green)">⑤</span> Synthesis Agent
-      </div>
+    <div style="font-size:10px;font-family:var(--mono);color:var(--text3)">
+      <div class="pipeline-step" id="step-router"><span style="color:var(--teal2)">①</span>&nbsp;Router Agent</div>
+      <div class="pipeline-arrow">↓</div>
+      <div class="pipeline-step" id="step-retrieval"><span style="color:var(--gold2)">②</span>&nbsp;Retrieval Agent</div>
+      <div class="pipeline-arrow">↓</div>
+      <div class="pipeline-step" id="step-reasoning"><span style="color:var(--accent2)">③</span>&nbsp;Reasoning Agent</div>
+      <div class="pipeline-arrow">↓</div>
+      <div class="pipeline-step" id="step-risk"><span style="color:var(--red)">④</span>&nbsp;Risk Agent</div>
+      <div class="pipeline-arrow">↓</div>
+      <div class="pipeline-step" id="step-validate"><span style="color:var(--purple)">⑤</span>&nbsp;Validation Agent</div>
+      <div class="pipeline-arrow">↓</div>
+      <div class="pipeline-step" id="step-synthesis"><span style="color:var(--green)">⑥</span>&nbsp;Synthesis Agent</div>
     </div>
   </div>
 
-  <!-- Suggested Queries -->
+  <!-- Sample Queries -->
   <div class="sidebar-section">
     <div class="sidebar-label">💡 Sample Queries</div>
     <button class="query-chip" onclick="useQuery(this)">
@@ -592,9 +220,9 @@
       <span class="chip-sector">CROSS-CUTTING</span>
       What are common risks around procurement delays across sectors?
     </button>
-      <button class="query-chip" onclick="useQuery(this)" style="border-color:rgba(227,179,65,0.4);background:rgba(227,179,65,0.05)">
-        <span class="chip-sector" style="color:#e3b341">⚡ CROSS-SECTOR COMPARE</span>
-        Compare how Transport and WASH projects handled community engagement differently — what worked in each sector and why?
+    <button class="query-chip highlight" onclick="useQuery(this)">
+      <span class="chip-sector" style="color:var(--gold2)">⚡ CROSS-SECTOR COMPARE</span>
+      Compare how Transport and WASH projects handled community engagement differently — what worked in each sector and why?
     </button>
   </div>
 
@@ -602,30 +230,27 @@
   <div class="sidebar-section">
     <div class="sidebar-label">📚 Knowledge Base</div>
     <div class="kb-item">
-      <div class="kb-icon transport">🚗</div>
-      <div><div style="color:var(--text2)">Rural Roads ICR</div><div class="kb-meta">P123456 · Transport</div></div>
+      <div class="kb-icon" style="background:rgba(31,111,235,0.15);color:var(--accent2)">🚗</div>
+      <div><div style="color:var(--text2)">Bihar Rural Roads ICR</div><div class="kb-meta">P155522 · Transport</div></div>
     </div>
     <div class="kb-item">
-      <div class="kb-icon agriculture">🌾</div>
-      <div><div style="color:var(--text2)">Digital Agriculture</div><div class="kb-meta">ITSEF · 12 Projects</div></div>
+      <div class="kb-icon" style="background:rgba(46,160,67,0.15);color:var(--green)">🌾</div>
+      <div><div style="color:var(--text2)">Digital Agriculture ITSEF</div><div class="kb-meta">12 Projects · Agriculture</div></div>
     </div>
     <div class="kb-item">
-      <div class="kb-icon wash">💧</div>
-      <div><div style="color:var(--text2)">Urban WASH PAD</div><div class="kb-meta">P198765 · MENA</div></div>
+      <div class="kb-icon" style="background:rgba(59,173,161,0.15);color:var(--teal2)">💧</div>
+      <div><div style="color:var(--text2)">WASH Lessons 2023</div><div class="kb-meta">34 Operations · GWSP</div></div>
     </div>
     <div class="kb-item">
-      <div class="kb-icon education">📖</div>
-      <div><div style="color:var(--text2)">Education ISR</div><div class="kb-meta">West Africa Active</div></div>
+      <div class="kb-icon" style="background:rgba(210,153,34,0.15);color:var(--gold2)">📖</div>
+      <div><div style="color:var(--text2)">Education ISR West Africa</div><div class="kb-meta">Active Project</div></div>
     </div>
     <div class="kb-item">
-      <div class="kb-icon fcs">⚠️</div>
-      <div><div style="color:var(--text2)">FCS Synthesis</div><div class="kb-meta">45 Projects · ITSEF</div></div>
+      <div class="kb-icon" style="background:rgba(218,54,51,0.15);color:#ff7b72">⚠️</div>
+      <div><div style="color:var(--text2)">FCS Adaptive Design IEG</div><div class="kb-meta">52 Projects · 2024</div></div>
     </div>
-
-    <!-- Upload -->
-    <div class="upload-zone" onclick="document.getElementById('file-upload').click()" style="margin-top:10px">
-      <div style="font-size:16px;margin-bottom:4px">📄</div>
-      Drop or click to upload .txt document
+    <div style="border:1px dashed var(--border2);border-radius:var(--radius);padding:14px;text-align:center;cursor:pointer;font-size:12px;color:var(--text3);margin-top:10px" onclick="document.getElementById('file-upload').click()">
+      📄 Drop or click to upload .txt document
     </div>
     <input type="file" id="file-upload" accept=".txt,.md" style="display:none" onchange="uploadFile(event)" />
   </div>
@@ -635,45 +260,38 @@
     <div class="sidebar-label">ℹ API Mode</div>
     <div style="font-size:11px;color:var(--text3);line-height:1.6;font-family:var(--mono)">
       Frontend → FastAPI → LangGraph Pipeline → OpenAI.<br><br>
-      Run <span style="color:var(--accent2)">uvicorn server:app</span> in <span style="color:var(--gold2)">/backend</span> to connect.
+      Backend: <span style="color:var(--accent2)">sector-ai-agent.onrender.com</span>
     </div>
   </div>
 </aside>
 
-<!-- MAIN CHAT -->
 <main class="main">
   <div class="chat-area" id="chat-area">
-    <!-- Welcome screen -->
     <div class="welcome" id="welcome-screen">
       <div class="welcome-icon">🌐</div>
       <h1>World Bank Sector Knowledge Agent</h1>
-      <p>A LangGraph multi-agent system — Router, Retrieval, Reasoning, Risk, and Synthesis agents working together to surface grounded insights from sector documents.</p>
+      <p>A 6-agent LangGraph system that retrieves operational insights from real World Bank sector documents — with validation, risk assessment, and responsible AI safeguards built in.</p>
       <div class="pipeline-steps">
-        <span class="pipeline-step">LangGraph</span>
-        <span class="pipeline-arrow">→</span>
-        <span class="pipeline-step">FAISS Retrieval</span>
-        <span class="pipeline-arrow">→</span>
-        <span class="pipeline-step">5 Agents</span>
-        <span class="pipeline-arrow">→</span>
-        <span class="pipeline-step">GPT-4o-mini</span>
-        <span class="pipeline-arrow">→</span>
-        <span class="pipeline-step">Grounded Insights</span>
+        <span class="pipeline-step-badge">LangGraph</span>
+        <span class="pipeline-arrow-badge">→</span>
+        <span class="pipeline-step-badge">FAISS Retrieval</span>
+        <span class="pipeline-arrow-badge">→</span>
+        <span class="pipeline-step-badge">6 Agents</span>
+        <span class="pipeline-arrow-badge">→</span>
+        <span class="pipeline-step-badge">Validated Insights</span>
       </div>
-      <p style="color:var(--text3);font-size:12px;font-family:var(--mono)">Configure API key → Initialize → Query the knowledge base</p>
+      <p style="color:var(--text3);font-size:12px;font-family:var(--mono)">Auto-connecting to backend…</p>
     </div>
   </div>
 
-  <!-- Input bar -->
   <div class="input-bar">
     <div class="input-row">
       <div class="input-wrap">
         <textarea id="query-input" rows="1" placeholder="Ask about sector lessons, risks, operational insights…" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
       </div>
-      <button class="send-btn" id="send-btn" onclick="sendQuery()" disabled title="Send query">
-        ➤
-      </button>
+      <button class="send-btn" id="send-btn" onclick="sendQuery()" disabled title="Send query">➤</button>
     </div>
-    <div class="input-hint">⏎ Send · Shift+⏎ New line · Initialize agent before querying</div>
+    <div class="input-hint">⏎ Send · Shift+⏎ New line</div>
   </div>
 </main>
 
@@ -682,417 +300,236 @@
 <script>
 const API_BASE = 'https://sector-ai-agent.onrender.com';
 let agentReady = false;
+let isLoading = false;
 
-// Auto-connect on page load
-window.addEventListener('load', () => setTimeout(autoConnect, 1500));
+// ── Status ────────────────────────────────────────────────────────────────────
+function setStatus(state) {
+  const dot = document.getElementById('status-dot');
+  const label = document.getElementById('status-label');
+  const map = {not_init:['','NOT INITIALIZED'],loading:['loading','INITIALIZING…'],ready:['ready','AGENT READY'],querying:['loading','RETRIEVING…']};
+  const [cls,text] = map[state]||['',state];
+  dot.className = 'status-dot ' + cls;
+  label.textContent = text;
+}
+
+function showToast(msg, type='info') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'show ' + type;
+  clearTimeout(t._t); t._t = setTimeout(()=>t.className='',3200);
+}
+
+function activatePipeline() {
+  ['step-router','step-retrieval','step-reasoning','step-risk','step-validate','step-synthesis'].forEach((id,i)=>{
+    setTimeout(()=>{ const el=document.getElementById(id); if(el) el.classList.add('active'); },i*300);
+  });
+}
+
+function autoResize(el) { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,120)+'px'; }
+
+// ── Auto-connect ──────────────────────────────────────────────────────────────
+window.addEventListener('load', ()=>setTimeout(autoConnect, 1200));
 
 async function autoConnect() {
+  setStatus('loading');
   try {
-    setStatus('loading');
-    const res = await fetch(API_BASE + '/health');
+    const res = await fetch(`${API_BASE}/health`);
     const data = await res.json();
     if (data.agent_ready) {
       agentReady = true;
       setStatus('ready');
       document.getElementById('send-btn').disabled = false;
-      activatePipelineSteps();
-      showToast('Agent ready — knowledge base loaded ✓', 'success');
+      activatePipeline();
+      showToast('Agent ready — knowledge base loaded ✓','success');
     } else {
-      // Try to initialize it
-      const res2 = await fetch(API_BASE + '/init', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({openai_api_key: 'auto', llm_model: 'gpt-4o-mini', chunk_size: 800, retriever_k: 5})
-      });
+      // Try to initialize
+      const res2 = await fetch(`${API_BASE}/init`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({openai_api_key:'auto',llm_model:'gpt-4o-mini',chunk_size:800,retriever_k:5})});
       if (res2.ok) {
         agentReady = true;
         setStatus('ready');
         document.getElementById('send-btn').disabled = false;
-        activatePipelineSteps();
-        showToast('Agent ready ✓', 'success');
+        activatePipeline();
+        showToast('Agent ready ✓','success');
+      } else {
+        setStatus('not_init');
+        showToast('Backend waking up… refresh in 60s','error');
       }
     }
   } catch(e) {
     setStatus('not_init');
-    showToast('Backend waking up... refresh in 60s', 'error');
-  }
-}
-let isLoading = false;
-
-// ── Utility ────────────────────────────────────────────────────────────────
-function showToast(msg, type = 'info') {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = `show ${type}`;
-  clearTimeout(t._timer);
-  t._timer = setTimeout(() => t.className = '', 3200);
-}
-
-function setStatus(state) {
-  const dot = document.getElementById('status-dot');
-  const label = document.getElementById('status-label');
-  const states = {
-    not_init: ['', 'NOT INITIALIZED'],
-    loading: ['loading', 'INITIALIZING…'],
-    ready: ['ready', 'AGENT READY'],
-    querying: ['loading', 'RETRIEVING…'],
-  };
-  const [cls, text] = states[state] || ['', state];
-  dot.className = `status-dot ${cls}`;
-  label.textContent = text;
-}
-
-function activatePipelineSteps() {
-  const steps = ['step-router','step-retrieval','step-reasoning','step-risk','step-validate','step-synthesis'];
-  steps.forEach((id, i) => {
-    setTimeout(() => {
-      const el = document.getElementById(id);
-      if (el) { el.style.opacity = '1'; el.style.transition = 'opacity 0.4s'; }
-    }, i * 300);
-  });
-}
-
-function autoResize(el) {
-  el.style.height = 'auto';
-  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
-}
-
-// ── Init ───────────────────────────────────────────────────────────────────
-async function initAgent() {
-  const key = document.getElementById('api-key').value.trim();
-  if (!key) { showToast('Enter your OpenAI API key', 'error'); return; }
-
-  const btn = document.getElementById('init-btn');
-  btn.disabled = true;
-  btn.textContent = 'Initializing…';
-  setStatus('loading');
-
-  try {
-    const res = await fetch(`${API_BASE}/init`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        openai_api_key: key,
-        llm_model: document.getElementById('llm-model').value,
-        chunk_size: parseInt(document.getElementById('chunk-size').value),
-        retriever_k: parseInt(document.getElementById('retriever-k').value),
-      }),
-    });
-    if (!res.ok) throw new Error(await res.text());
-    const data = await res.json();
-    agentReady = true;
-    setStatus('ready');
-    document.getElementById('send-btn').disabled = false;
-    activatePipelineSteps();
-    showToast('Agent ready — knowledge base loaded ✓', 'success');
-    btn.textContent = '✓ Initialized';
-  } catch (err) {
-    setStatus('not_init');
-    showToast(`Init failed: ${err.message}`, 'error');
-    btn.disabled = false;
-    btn.textContent = 'Initialize Agent';
+    showToast('Backend waking up… refresh in 60s','error');
   }
 }
 
-// ── Query ──────────────────────────────────────────────────────────────────
+// ── Send query ────────────────────────────────────────────────────────────────
 function useQuery(el) {
-  const q = el.innerText.replace(/^[A-Z\s]+\n/, '').trim();
+  const q = el.innerText.replace(/^[A-Z⚡\s·]+\n/,'').trim();
   document.getElementById('query-input').value = q;
-  if (agentReady) sendQuery();
+  if (agentReady && !isLoading) sendQuery();
 }
 
 function handleKey(e) {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault();
-    if (agentReady && !isLoading) sendQuery();
-  }
+  if (e.key==='Enter' && !e.shiftKey) { e.preventDefault(); if(agentReady&&!isLoading) sendQuery(); }
 }
 
 async function sendQuery() {
   const input = document.getElementById('query-input');
   const question = input.value.trim();
   if (!question || isLoading) return;
-
   isLoading = true;
-  input.value = '';
-  input.style.height = 'auto';
+  input.value = ''; input.style.height='auto';
   document.getElementById('send-btn').disabled = true;
   document.getElementById('welcome-screen')?.remove();
-
-  appendMessage('user', question);
+  appendUserMessage(question);
   const thinkingEl = appendThinking();
   setStatus('querying');
 
   try {
-    const res = await fetch(`${API_BASE}/query`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question, use_pipeline: true }),
+    const res = await fetch(`${API_BASE}/query`,{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({question, use_pipeline:true})
     });
     if (!res.ok) throw new Error(await res.text());
     const data = await res.json();
     thinkingEl.remove();
-    window._lastValidation = data.validation || null;
-    appendAgentMessage(data.answer, data.sources || [], data.agent_trace || [], data.risks || [], data.domain || '');
+    appendAgentMessage(data);
     setStatus('ready');
-  } catch (err) {
+  } catch(err) {
     thinkingEl.remove();
-    appendAgentMessage(`⚠ Error: ${err.message}`, []);
+    appendAgentMessage({answer:`⚠ Error: ${err.message}`, sources:[], agent_trace:[], risks:[], validation:{}});
     setStatus('ready');
-    showToast('Query failed', 'error');
-  } finally {
-    isLoading = false;
-    document.getElementById('send-btn').disabled = false;
-    input.focus();
+    showToast('Query failed','error');
   }
+  isLoading = false;
+  document.getElementById('send-btn').disabled = false;
+  document.getElementById('query-input').focus();
 }
 
-// ── DOM helpers ────────────────────────────────────────────────────────────
-function appendMessage(role, text) {
+// ── Render messages ───────────────────────────────────────────────────────────
+function appendUserMessage(text) {
   const chat = document.getElementById('chat-area');
   const div = document.createElement('div');
-  div.className = `message ${role === 'user' ? 'user' : 'system'}`;
-  div.innerHTML = `
-    <div class="avatar ${role === 'user' ? 'user' : 'agent'}">${role === 'user' ? '👤' : '🌐'}</div>
-    <div class="bubble">${escapeHtml(text)}</div>
-  `;
-  chat.appendChild(div);
-  chat.scrollTop = chat.scrollHeight;
-  return div;
-}
-
-function appendAgentMessage(answer, sources, trace, risks, domain) {
-  const chat = document.getElementById('chat-area');
-  const div = document.createElement('div');
-  div.className = 'message system';
-
-  // Sources
-  let sourcesHtml = '';
-  if (sources && sources.length) {
-    const cards = sources.slice(0, 4).map(s => `
-      <div class="source-card">
-        <div class="source-file">📄 ${s.source ? s.source.split('/').pop() : 'Document'} · p.${s.page || 'N/A'}</div>
-        <div class="source-snippet">${escapeHtml(s.snippet || '')}</div>
-      </div>`).join('');
-    sourcesHtml = `<div class="sources">
-      <div class="sources-label">Retrieved Sources (${sources.length})</div>
-      ${cards}
-    </div>`;
-  }
-
-  // Agent trace
-  let traceHtml = '';
-  if (trace && trace.length) {
-    const steps = trace.map((t,i) => `
-      <div style="display:flex;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);font-size:11px">
-        <span style="color:var(--gold2);font-family:var(--mono);min-width:18px">0${i+1}</span>
-        <div>
-          <div style="color:var(--accent2);font-family:var(--mono);font-size:10px;margin-bottom:1px">${t.agent}</div>
-          <div style="color:var(--text2)">${escapeHtml(t.output_summary)}</div>
-          <div style="color:var(--text3);font-family:var(--mono);font-size:9px">${t.duration_ms}ms</div>
-        </div>
-      </div>`).join('');
-    traceHtml = `<div style="margin-top:12px;border-top:1px solid var(--border);padding-top:10px">
-      <div style="font-size:10px;font-family:var(--mono);color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">
-        ⚡ Agent Trace${domain ? ' · ' + domain : ''}
-      </div>
-      ${steps}
-    </div>`;
-  }
-
-  // Risks
-  let risksHtml = '';
-  if (risks && risks.length) {
-    const SEVERITY_COLORS = {High:'#ff6b6b', Medium:'#ffb347', Low:'#4ecb8d'};
-    const cards = risks.map(r => `
-      <div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px">
-        <span style="font-family:var(--mono);font-size:9px;padding:2px 6px;border-radius:2px;
-          background:rgba(255,255,255,0.05);color:${SEVERITY_COLORS[r.severity]||'#888'};
-          border:1px solid ${SEVERITY_COLORS[r.severity]||'#888'};flex-shrink:0;height:fit-content">
-          ${r.severity}
-        </span>
-        <div>
-          <div style="font-weight:600;margin-bottom:2px">${escapeHtml(r.risk)}</div>
-          <div style="color:var(--text2);font-style:italic;font-size:11px">${escapeHtml(r.mitigation)}</div>
-        </div>
-      </div>`).join('');
-    risksHtml = `<div style="margin-top:12px;border-top:1px solid var(--border);padding-top:10px">
-      <div style="font-size:10px;font-family:var(--mono);color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">
-        ⚠️ Risk Assessment (${risks.length} risks)
-      </div>
-      ${cards}
-    </div>`;
-  }
-
-  const msgId = 'msg-' + Date.now();
-
-  // HITL warning if low confidence
-  const avgScore = trace && trace.length ?
-    Math.round(trace.reduce((a,t) => a + (t.duration_ms > 0 ? 1 : 0), 0)) : 0;
-  const isLowConf = answer.length < 200 || (trace && trace.length === 0);
-  const hitlHtml = isLowConf ? `
-    <div class="hitl-warning">
-      <span class="hitl-icon">⚠️</span>
-      <div class="hitl-text"><strong>Low confidence response</strong> — recommend human review before acting on this insight. Verify sources independently.</div>
-    </div>` : '';
-
-  const bubbleContent = document.createElement('div');
-  bubbleContent.className = 'bubble';
-  bubbleContent.innerHTML = `
-      <div style="white-space:pre-wrap;word-wrap:break-word">${escapeHtml(answer)}</div>
-      ${sourcesHtml}
-      ${traceHtml}
-      ${risksHtml}
-      ${hitlHtml}
-      <div class="feedback-row" id="${msgId}">`;
-
-  // Inject validation panel
-  if (window._lastValidation) {
-    renderValidation(window._lastValidation, bubbleContent);
-    window._lastValidation = null;
-  }
-
-  div.innerHTML = '';
-  div.appendChild(document.createElement('div')).outerHTML;
-  const avatarDiv = document.createElement('div');
-  avatarDiv.className = 'avatar agent';
-  avatarDiv.textContent = '🌐';
-  div.appendChild(avatarDiv);
-  div.appendChild(bubbleContent);
-  chat.appendChild(div);
-  chat.scrollTop = chat.scrollHeight;
-}
-
-function _appendAgentMessage_unused(answer, sources, trace, risks, domain) {
-  // old signature kept for reference
-  const msgId = 'x';
-  const div = document.createElement('div');
-  div.innerHTML = `
-    <div class="avatar agent">🌐</div>
-    <div class="bubble">
-      <div class="feedback-row" id="${msgId}">
-        <span class="feedback-label">Was this helpful?</span>
-        <button class="feedback-btn" onclick="submitFeedback('${msgId}', 1, this)" title="Yes, helpful">👍</button>
-        <button class="feedback-btn" onclick="submitFeedback('${msgId}', -1, this)" title="Not helpful">👎</button>
-      </div>
-    </div>
-  `;
-  chat.appendChild(div);
-  chat.scrollTop = chat.scrollHeight;
+  div.className = 'message user';
+  div.innerHTML = `<div class="avatar user">👤</div><div class="bubble">${escHtml(text)}</div>`;
+  chat.appendChild(div); chat.scrollTop = chat.scrollHeight;
 }
 
 function appendThinking() {
   const chat = document.getElementById('chat-area');
   const div = document.createElement('div');
   div.className = 'message system';
-  div.innerHTML = `
-    <div class="avatar agent">🌐</div>
-    <div class="thinking">
-      <div class="thinking-dots"><span></span><span></span><span></span></div>
-      <span style="font-size:11px">Running 7-agent pipeline…</span>
-    </div>
-  `;
-  chat.appendChild(div);
-  chat.scrollTop = chat.scrollHeight;
+  div.innerHTML = `<div class="avatar agent">🌐</div><div class="thinking"><div class="thinking-dots"><span></span><span></span><span></span></div><span style="font-size:11px">Running 6-agent pipeline…</span></div>`;
+  chat.appendChild(div); chat.scrollTop = chat.scrollHeight;
   return div;
 }
 
-async 
-function renderValidation(validation, bubbleDiv) {
-  if (!validation || !Object.keys(validation).length) return;
-  const score = validation.confidence_score || 75;
-  const grounding = validation.grounding_level || 'Medium';
-  const rec = validation.recommendation || 'Review recommended';
-  const flag = validation.flag || false;
-  const verified = validation.verified_claims || [];
-  const unverified = validation.unverified_claims || [];
+function appendAgentMessage(data) {
+  const chat = document.getElementById('chat-area');
+  const div = document.createElement('div');
+  div.className = 'message system';
 
-  const barColor = score >= 85 ? 'var(--green)' : score >= 60 ? 'var(--gold2)' : 'var(--red)';
-  const badgeClass = rec.includes('Approved') ? 'val-approved' : rec.includes('Human') ? 'val-human' : 'val-review';
+  const answer   = data.answer || data.final_answer || '';
+  const sources  = data.sources || data.retrieved_docs || [];
+  const trace    = data.agent_trace || [];
+  const risks    = data.risks || [];
+  const validation = data.validation || {};
+  const domain   = data.domain || '';
+  const msgId    = 'msg-' + Date.now();
 
-  const valDiv = document.createElement('div');
-  valDiv.className = 'validation-panel';
-  valDiv.innerHTML = `
-    <div class="val-header">
-      <div>
-        <div class="val-label">🛡 Validation Agent</div>
-        <div style="display:flex;align-items:baseline;gap:6px;margin-top:3px">
-          <div class="val-score" style="color:${barColor}">${score}</div>
-          <div style="font-size:10px;color:var(--text3);font-family:var(--mono)">/100 confidence · ${grounding} grounding</div>
+  // Sources HTML
+  let srcHtml = '';
+  if (sources.length) {
+    srcHtml = `<div class="sources"><div class="sources-label">Retrieved Sources (${sources.length})</div>${
+      sources.slice(0,4).map(s=>`<div class="source-card"><div class="source-file">📄 ${escHtml((s.source||'').split('/').pop())} · p.${s.page||'N/A'}</div><div class="source-snippet">${escHtml((s.snippet||'').slice(0,160))}</div></div>`).join('')
+    }</div>`;
+  }
+
+  // Trace HTML
+  let traceHtml = '';
+  if (trace.length) {
+    traceHtml = `<div class="trace-section"><div class="trace-label">⚡ Agent Trace${domain?' · '+domain:''}</div>${
+      trace.map((t,i)=>`<div class="trace-step"><div class="trace-num">0${i+1}</div><div><div class="trace-agent">${t.agent}</div><div class="trace-out">${escHtml(t.output_summary||'')}</div><div class="trace-ms">${t.duration_ms}ms</div></div></div>`).join('')
+    }</div>`;
+  }
+
+  // Risks HTML
+  let risksHtml = '';
+  if (risks.length) {
+    risksHtml = `<div class="risks-section"><div class="sources-label">⚠️ Risk Assessment (${risks.length} risks)</div>${
+      risks.map(r=>`<div class="risk-card"><span class="risk-badge badge-${(r.severity||'medium').toLowerCase()}">${r.severity}</span><div><div class="risk-name">${escHtml(r.risk)}</div><div class="risk-mit">${escHtml(r.mitigation)}</div></div></div>`).join('')
+    }</div>`;
+  }
+
+  // Validation HTML
+  let valHtml = '';
+  if (validation && validation.confidence_score !== undefined) {
+    const score = validation.confidence_score || 75;
+    const grounding = validation.grounding_level || 'Medium';
+    const rec = validation.recommendation || 'Review recommended';
+    const flag = validation.flag || false;
+    const barColor = score>=85?'var(--green)':score>=60?'var(--gold2)':'var(--red)';
+    const badgeClass = rec.includes('Approved')?'val-approved':rec.includes('Human')?'val-human':'val-review';
+    const verified = (validation.verified_claims||[]).slice(0,2);
+    const unverified = (validation.unverified_claims||[]).slice(0,2);
+    valHtml = `<div class="validation-section">
+      <div class="val-header">
+        <div>
+          <div style="font-size:10px;font-family:var(--mono);color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px">🛡 Validation Agent</div>
+          <div style="display:flex;align-items:baseline;gap:6px">
+            <div class="val-score" style="color:${barColor}">${score}</div>
+            <div style="font-size:10px;color:var(--text3);font-family:var(--mono)">/100 · ${grounding} grounding</div>
+          </div>
         </div>
+        <span class="val-badge ${badgeClass}">${rec}</span>
       </div>
-      <span class="val-badge ${badgeClass}">${rec}</span>
-    </div>
-    <div class="val-bar"><div class="val-bar-fill" style="width:${score}%;background:${barColor}"></div></div>
-    <div class="val-claims">
-      ${verified.slice(0,2).map(c => `<div class="val-claim-good">✓ ${escapeHtml(c)}</div>`).join('')}
-      ${unverified.slice(0,2).map(c => `<div class="val-claim-bad">⚠ ${escapeHtml(c)}</div>`).join('')}
-    </div>
-    ${flag ? `<div class="hitl-warning" style="margin-top:8px">
-      <span class="hitl-icon">⚠️</span>
-      <div class="hitl-text"><strong>Human review recommended</strong> — confidence below threshold. Verify key claims against source documents before acting.</div>
-    </div>` : ''}
-  `;
-  bubbleDiv.appendChild(valDiv);
-}
-
-function submitFeedback(msgId, rating, btn) {
-  const row = document.getElementById(msgId);
-  if (!row) return;
-
-  // Visual feedback immediately
-  const btns = row.querySelectorAll('.feedback-btn');
-  btns.forEach(b => b.classList.remove('selected-up','selected-down'));
-  btn.classList.add(rating === 1 ? 'selected-up' : 'selected-down');
-
-  // Log to backend
-  try {
-    await fetch(`${API_BASE}/feedback`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ rating, message_id: msgId }),
-    });
-  } catch(e) { /* silent fail */ }
-
-  // Show thanks
-  setTimeout(() => {
-    row.innerHTML = '<span class="feedback-thanks">✓ Thanks for your feedback</span>';
-  }, 600);
-}
-
-function escapeHtml(str) {
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
-
-// ── Reset ──────────────────────────────────────────────────────────────────
-async function resetConversation() {
-  try {
-    await fetch(`${API_BASE}/reset`, { method: 'POST' });
-    document.getElementById('chat-area').innerHTML = '';
-    showToast('Conversation reset', 'success');
-  } catch {
-    showToast('Reset failed (is server running?)', 'error');
+      <div class="val-bar"><div class="val-bar-fill" style="width:${score}%;background:${barColor}"></div></div>
+      ${verified.map(c=>`<div class="val-claim" style="color:var(--green)">✓ ${escHtml(c)}</div>`).join('')}
+      ${unverified.map(c=>`<div class="val-claim" style="color:var(--red)">⚠ ${escHtml(c)}</div>`).join('')}
+      ${flag?`<div class="hitl-warning"><span>⚠️</span><div class="hitl-text"><strong>Human review recommended</strong> — confidence below threshold. Verify key claims against source documents.</div></div>`:''}
+    </div>`;
   }
+
+  // Feedback
+  const fbHtml = `<div class="feedback-row" id="${msgId}">
+    <span class="feedback-label">Was this helpful?</span>
+    <button class="feedback-btn" onclick="submitFeedback('${msgId}',1,this)">👍</button>
+    <button class="feedback-btn" onclick="submitFeedback('${msgId}',-1,this)">👎</button>
+  </div>`;
+
+  div.innerHTML = `<div class="avatar agent">🌐</div>
+    <div class="bubble">
+      <div style="white-space:pre-wrap;word-wrap:break-word">${escHtml(answer)}</div>
+      ${srcHtml}${traceHtml}${risksHtml}${valHtml}${fbHtml}
+    </div>`;
+
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
 }
 
-// ── Upload ─────────────────────────────────────────────────────────────────
+// ── Feedback ──────────────────────────────────────────────────────────────────
+async function submitFeedback(id, rating, btn) {
+  const row = document.getElementById(id);
+  row.querySelectorAll('.feedback-btn').forEach(b=>b.classList.remove('up','down'));
+  btn.classList.add(rating===1?'up':'down');
+  try { await fetch(`${API_BASE}/feedback`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({rating,message_id:id})}); } catch(e){}
+  setTimeout(()=>row.innerHTML='<span class="feedback-thanks">✓ Thanks for your feedback</span>',600);
+}
+
+// ── Upload ────────────────────────────────────────────────────────────────────
 async function uploadFile(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  const form = new FormData();
-  form.append('file', file);
-  try {
-    const res = await fetch(`${API_BASE}/upload`, { method: 'POST', body: form });
-    const data = await res.json();
-    showToast(`Uploaded ${file.name} → ${data.chunks} chunks`, 'success');
-  } catch (err) {
-    showToast(`Upload failed: ${err.message}`, 'error');
-  }
-  event.target.value = '';
+  const file = event.target.files[0]; if(!file) return;
+  const form = new FormData(); form.append('file',file);
+  try { const res=await fetch(`${API_BASE}/upload`,{method:'POST',body:form}); const d=await res.json(); showToast(`Uploaded ${file.name} → ${d.chunks} chunks`,'success'); }
+  catch(e) { showToast('Upload failed','error'); }
+  event.target.value='';
+}
+
+async function resetConversation() {
+  try { await fetch(`${API_BASE}/reset`,{method:'POST'}); document.getElementById('chat-area').innerHTML=''; showToast('Conversation reset','success'); }
+  catch { showToast('Reset failed','error'); }
+}
+
+function escHtml(str) {
+  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 </script>
 </body>
