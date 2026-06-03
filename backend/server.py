@@ -15,7 +15,7 @@ from pydantic import BaseModel
 from supabase import create_client, Client
 
 from rag_agent import AgentConfig, SectorAgent
-from pipeline import run_pipeline, get_store as get_vectorstore
+from pipeline import run_pipeline, get_vectorstore
 
 # ── Supabase ──────────────────────────────────────────────────────────────────
 supabase: Client | None = None
@@ -128,18 +128,18 @@ def query(req: QueryRequest):
 
             sources = [
                 {"source": d["source"], "page": d["page"], "snippet": d["snippet"]}
-                for d in result["wbs_docs"]
+                for d in result["retrieved_docs"]
             ]
 
-            log_query(req.question, result["wbs_answer"], sources,
-                      latency, session_id, "gpt-4o-mini", result["wbs_domain"])
+            log_query(req.question, result["final_answer"], sources,
+                      latency, session_id, "gpt-4o-mini", result["domain"])
 
             return {
-                "answer":        result["wbs_answer"],
+                "answer":        result["final_answer"],
                 "sources":       sources,
-                "domain":        result["wbs_domain"],
-                "risks":         result["wbs_risks"],
-                "agent_trace":   result["wbs_trace"],
+                "domain":        result["domain"],
+                "risks":         result["risks"],
+                "agent_trace":   result["agent_trace"],
                 "session_id":    session_id,
                 "latency_sec":   round(latency, 2),
                 "pipeline_mode": "multi-agent",
@@ -150,7 +150,7 @@ def query(req: QueryRequest):
                 raise HTTPException(status_code=503, detail="Agent not initialized")
             result  = _agent.query(req.question)
             latency = time.time() - t0
-            log_query(req.question, result["wbs_answer"], result.get("wbs_docs", []),
+            log_query(req.question, result["answer"], result.get("sources", []),
                       latency, session_id, "gpt-4o-mini", detect_domain(req.question))
             result["session_id"]    = session_id
             result["latency_sec"]   = round(latency, 2)
