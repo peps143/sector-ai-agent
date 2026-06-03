@@ -545,7 +545,7 @@
 
   <!-- RAG Pipeline Viz -->
   <div class="sidebar-section">
-    <div class="sidebar-label">⬡ Agent Pipeline</div>
+    <div class="sidebar-label">⬡ Agent Pipeline (6)</div>
     <div style="font-size: 11px; color: var(--text3); font-family: var(--mono); line-height: 2;">
       <div id="step-ingest" style="display:flex;align-items:center;gap:6px;opacity:0.4">
         <span style="color:var(--teal2)">①</span> Router Agent
@@ -743,11 +743,11 @@ function setStatus(state) {
 }
 
 function activatePipelineSteps() {
-  const steps = ['step-ingest','step-chunk','step-embed','step-index','step-mmr','step-gen'];
+  const steps = ['step-router','step-retrieval','step-reasoning','step-risk','step-validate','step-synthesis'];
   steps.forEach((id, i) => {
     setTimeout(() => {
-      document.getElementById(id).style.opacity = '1';
-      document.getElementById(id).style.transition = 'opacity 0.4s';
+      const el = document.getElementById(id);
+      if (el) { el.style.opacity = '1'; el.style.transition = 'opacity 0.4s'; }
     }, i * 300);
   });
 }
@@ -989,7 +989,7 @@ function appendThinking() {
     <div class="avatar agent">🌐</div>
     <div class="thinking">
       <div class="thinking-dots"><span></span><span></span><span></span></div>
-      <span style="font-size:11px">Running 5-agent pipeline…</span>
+      <span style="font-size:11px">Running 7-agent pipeline…</span>
     </div>
   `;
   chat.appendChild(div);
