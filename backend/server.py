@@ -15,7 +15,7 @@ from pydantic import BaseModel
 from supabase import create_client, Client
 
 from rag_agent import AgentConfig, SectorAgent
-from pipeline import run_pipeline, get_vectorstore
+from pipeline import run_pipeline, get_store as get_vectorstore
 
 # ── Supabase ──────────────────────────────────────────────────────────────────
 supabase: Client | None = None
@@ -128,21 +128,30 @@ def query(req: QueryRequest):
 
             sources = [
                 {"source": d["source"], "page": d["page"], "snippet": d["snippet"]}
-                for d in result["retrieved_docs"]
+                for d in result["wbs_docs"]
             ]
 
-            log_query(req.question, result["final_answer"], sources,
-                      latency, session_id, "gpt-4o-mini", result["domain"])
+            log_query(req.question, result["wbs_answer"], sources,
+                      latency, session_id, "gpt-4o-mini", result["wbs_domain"])
 
             return {
-                "answer":        result["final_answer"],
-                "sources":       sources,
-                "domain":        result["domain"],
-                "risks":         result["risks"],
-                "agent_trace":   result["agent_trace"],
-                "session_id":    session_id,
-                "latency_sec":   round(latency, 2),
-                "pipeline_mode": "multi-agent",
+                "answer":          result["wbs_answer"],
+                "final_answer":    result["wbs_answer"],
+                "sources":         sources,
+                "retrieved_docs":  result["wbs_docs"],
+                "domain":          result["wbs_domain"],
+                "query_type":      result["wbs_query_type"],
+                "risks":           result["wbs_risks"],
+                "agent_trace":     result["wbs_trace"],
+                "validation":      result.get("wbs_validation", {}),
+                "docs_one":        result.get("wbs_docs_one", []),
+                "docs_two":        result.get("wbs_docs_two", []),
+                "sector_one":      result.get("wbs_sector_one", ""),
+                "sector_two":      result.get("wbs_sector_two", ""),
+                "cross_analysis":  result.get("wbs_cross", ""),
+                "session_id":      session_id,
+                "latency_sec":     round(latency, 2),
+                "pipeline_mode":   "multi-agent (LangGraph)",
             }
         else:
             # ── Legacy single RAG chain ──
@@ -150,7 +159,7 @@ def query(req: QueryRequest):
                 raise HTTPException(status_code=503, detail="Agent not initialized")
             result  = _agent.query(req.question)
             latency = time.time() - t0
-            log_query(req.question, result["answer"], result.get("sources", []),
+            log_query(req.question, result["wbs_answer"], result.get("wbs_docs", []),
                       latency, session_id, "gpt-4o-mini", detect_domain(req.question))
             result["session_id"]    = session_id
             result["latency_sec"]   = round(latency, 2)
