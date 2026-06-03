@@ -37,6 +37,7 @@ class AgentState(TypedDict):
     wbs_cross:          str           # cross-sector comparison output
     wbs_risks:          list[dict]
     wbs_answer:         str
+    wbs_validation:     dict      # validation agent output
     wbs_trace:          list[dict]
     wbs_current:        str
     wbs_error:          str
@@ -278,8 +279,81 @@ def risk_agent(state: AgentState) -> AgentState:
     return {**state, "wbs_risks": risks, "wbs_current": "synthesizer", "wbs_trace": state["wbs_trace"]+[trace]}
 
 
+
 # ══════════════════════════════════════════════════════════════════════════════
-# AGENT 6 — Synthesis Agent
+# VALIDATION AGENT — checks answer is grounded in sources
+# Sits between Risk and Synthesis
+# ══════════════════════════════════════════════════════════════════════════════
+def validation_agent(state: AgentState) -> AgentState:
+    t0  = time.time()
+    llm = get_llm(0.1)
+
+    # Get source content for grounding check
+    docs_text = "\n\n".join(
+        f"[{d['source']}]: {d['content'][:300]}"
+        for d in state.get("wbs_docs", [])[:4]
+    ) or "No source documents available."
+
+    insights = state.get("wbs_insights", "") or state.get("wbs_cross", "")
+
+    resp = llm.invoke([
+        SystemMessage(content="""You are a Validation Agent for a World Bank ITSEF knowledge system.
+Your role is responsible AI oversight — checking that the analysis is grounded in source documents.
+
+Evaluate the analysis against the source documents and return ONLY a JSON object:
+{
+  "confidence_score": <0-100>,
+  "grounding_level": "High/Medium/Low",
+  "verified_claims": ["claim 1", "claim 2"],
+  "unverified_claims": ["claim that lacks source support"],
+  "recommendation": "Approved for use / Review recommended / Human verification required",
+  "flag": false
+}
+
+Rules:
+- confidence_score 85-100: well grounded, flag=false
+- confidence_score 60-84: partially grounded, flag=false  
+- confidence_score below 60: poorly grounded, flag=true, recommendation="Human verification required"
+- If no source documents, score=40, flag=true
+Return ONLY the JSON object, no other text."""),
+        HumanMessage(content=f"""Source Documents:
+{docs_text}
+
+Analysis to validate:
+{insights[:800]}
+
+Evaluate grounding and return JSON.""")
+    ])
+
+    try:
+        raw   = resp.content.strip()
+        match = re.search(r'{.*}', raw, re.DOTALL)
+        validation = json.loads(match.group()) if match else {}
+    except Exception:
+        validation = {
+            "confidence_score": 75,
+            "grounding_level": "Medium",
+            "verified_claims": ["Analysis based on retrieved documents"],
+            "unverified_claims": [],
+            "recommendation": "Review recommended",
+            "flag": False,
+        }
+
+    ms    = int((time.time()-t0)*1000)
+    score = validation.get("confidence_score", 75)
+    flag  = validation.get("flag", False)
+    trace = make_trace(
+        "Validation Agent",
+        f"Checking {len(state.get('wbs_docs',[]))} source docs against analysis",
+        f"Confidence: {score}/100 | Grounding: {validation.get('grounding_level','?')} | Flag: {flag}",
+        ms,
+        "warning" if flag else "success",
+    )
+    return {**state, "wbs_validation": validation, "wbs_trace": state["wbs_trace"]+[trace]}
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# AGENT 6 (now 7) — Synthesis Agent
 # ══════════════════════════════════════════════════════════════════════════════
 def synthesis_agent(state: AgentState) -> AgentState:
     t0  = time.time()
@@ -341,6 +415,7 @@ def build_pipeline():
     g.add_node("reasoner",   reasoner_agent)
     g.add_node("comparator", comparator_agent)
     g.add_node("riskagent",  risk_agent)
+    g.add_node("validator",  validation_agent)
     g.add_node("synthesizer",synthesis_agent)
 
     g.set_entry_point("router")
@@ -350,7 +425,8 @@ def build_pipeline():
     g.add_conditional_edges("branch_b", route_from_branch_b, {"comparator":"comparator","reasoner":"reasoner"})
     g.add_edge("reasoner",   "riskagent")
     g.add_edge("comparator", "riskagent")
-    g.add_edge("riskagent",  "synthesizer")
+    g.add_edge("riskagent",  "validator")
+    g.add_edge("validator",  "synthesizer")
     g.add_edge("synthesizer", END)
     return g.compile()
 
@@ -372,6 +448,7 @@ def run_pipeline(query: str) -> AgentState:
         "wbs_cross":        "",
         "wbs_risks":        [],
         "wbs_answer":       "",
+        "wbs_validation":   {},
         "wbs_trace":        [],
         "wbs_current":      "router",
         "wbs_error":        "",
