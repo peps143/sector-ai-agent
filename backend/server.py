@@ -128,18 +128,18 @@ def query(req: QueryRequest):
 
             sources = [
                 {"source": d["source"], "page": d["page"], "snippet": d["snippet"]}
-                for d in result["retrieved_docs"]
+                for d in result["wbs_docs"]
             ]
 
-            log_query(req.question, result["final_answer"], sources,
-                      latency, session_id, "gpt-4o-mini", result["domain"])
+            log_query(req.question, result["wbs_answer"], sources,
+                      latency, session_id, "gpt-4o-mini", result["wbs_domain"])
 
             return {
-                "answer":        result["final_answer"],
+                "answer":        result["wbs_answer"],
                 "sources":       sources,
-                "domain":        result["domain"],
-                "risks":         result["risks"],
-                "agent_trace":   result["agent_trace"],
+                "domain":        result["wbs_domain"],
+                "risks":         result["wbs_risks"],
+                "agent_trace":   result["wbs_trace"],
                 "session_id":    session_id,
                 "latency_sec":   round(latency, 2),
                 "pipeline_mode": "multi-agent",
@@ -150,7 +150,7 @@ def query(req: QueryRequest):
                 raise HTTPException(status_code=503, detail="Agent not initialized")
             result  = _agent.query(req.question)
             latency = time.time() - t0
-            log_query(req.question, result["answer"], result.get("sources", []),
+            log_query(req.question, result["wbs_answer"], result.get("wbs_docs", []),
                       latency, session_id, "gpt-4o-mini", detect_domain(req.question))
             result["session_id"]    = session_id
             result["latency_sec"]   = round(latency, 2)
