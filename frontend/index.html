@@ -466,6 +466,22 @@
   .hitl-icon{font-size:16px;flex-shrink:0}
   .hitl-text{font-size:12px;color:var(--gold2);line-height:1.5}
 
+
+  /* Validation panel */
+  .validation-panel{margin-top:12px;border-top:1px solid var(--border);padding-top:12px}
+  .val-header{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .val-score{font-family:var(--mono);font-size:18px;font-weight:700}
+  .val-label{font-size:11px;font-family:var(--mono);color:var(--text3);letter-spacing:1px;text-transform:uppercase}
+  .val-badge{font-family:var(--mono);font-size:9px;padding:3px 8px;border-radius:3px;margin-left:auto;text-transform:uppercase;letter-spacing:1px}
+  .val-approved{background:rgba(46,160,67,0.12);color:var(--green);border:1px solid rgba(46,160,67,0.25)}
+  .val-review{background:rgba(210,153,34,0.12);color:var(--gold2);border:1px solid rgba(210,153,34,0.25)}
+  .val-human{background:rgba(218,54,51,0.12);color:var(--red);border:1px solid rgba(218,54,51,0.25)}
+  .val-bar{height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;margin-bottom:10px}
+  .val-bar-fill{height:100%;border-radius:2px;transition:width 0.8s}
+  .val-claims{font-size:11px;line-height:1.7}
+  .val-claim-good{color:var(--green)}
+  .val-claim-bad{color:var(--red)}
+
   /* Toast */
   #toast {
     position: fixed;
@@ -816,6 +832,7 @@ async function sendQuery() {
     if (!res.ok) throw new Error(await res.text());
     const data = await res.json();
     thinkingEl.remove();
+    window._lastValidation = data.validation || null;
     appendAgentMessage(data.answer, data.sources || [], data.agent_trace || [], data.risks || [], data.domain || '');
     setStatus('ready');
   } catch (err) {
@@ -919,14 +936,40 @@ function appendAgentMessage(answer, sources, trace, risks, domain) {
       <div class="hitl-text"><strong>Low confidence response</strong> — recommend human review before acting on this insight. Verify sources independently.</div>
     </div>` : '';
 
-  div.innerHTML = `
-    <div class="avatar agent">🌐</div>
-    <div class="bubble">
+  const bubbleContent = document.createElement('div');
+  bubbleContent.className = 'bubble';
+  bubbleContent.innerHTML = `
       <div style="white-space:pre-wrap;word-wrap:break-word">${escapeHtml(answer)}</div>
       ${sourcesHtml}
       ${traceHtml}
       ${risksHtml}
       ${hitlHtml}
+      <div class="feedback-row" id="${msgId}">`;
+
+  // Inject validation panel
+  if (window._lastValidation) {
+    renderValidation(window._lastValidation, bubbleContent);
+    window._lastValidation = null;
+  }
+
+  div.innerHTML = '';
+  div.appendChild(document.createElement('div')).outerHTML;
+  const avatarDiv = document.createElement('div');
+  avatarDiv.className = 'avatar agent';
+  avatarDiv.textContent = '🌐';
+  div.appendChild(avatarDiv);
+  div.appendChild(bubbleContent);
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function _appendAgentMessage_unused(answer, sources, trace, risks, domain) {
+  // old signature kept for reference
+  const msgId = 'x';
+  const div = document.createElement('div');
+  div.innerHTML = `
+    <div class="avatar agent">🌐</div>
+    <div class="bubble">
       <div class="feedback-row" id="${msgId}">
         <span class="feedback-label">Was this helpful?</span>
         <button class="feedback-btn" onclick="submitFeedback('${msgId}', 1, this)" title="Yes, helpful">👍</button>
@@ -954,7 +997,46 @@ function appendThinking() {
   return div;
 }
 
-async function submitFeedback(msgId, rating, btn) {
+async 
+function renderValidation(validation, bubbleDiv) {
+  if (!validation || !Object.keys(validation).length) return;
+  const score = validation.confidence_score || 75;
+  const grounding = validation.grounding_level || 'Medium';
+  const rec = validation.recommendation || 'Review recommended';
+  const flag = validation.flag || false;
+  const verified = validation.verified_claims || [];
+  const unverified = validation.unverified_claims || [];
+
+  const barColor = score >= 85 ? 'var(--green)' : score >= 60 ? 'var(--gold2)' : 'var(--red)';
+  const badgeClass = rec.includes('Approved') ? 'val-approved' : rec.includes('Human') ? 'val-human' : 'val-review';
+
+  const valDiv = document.createElement('div');
+  valDiv.className = 'validation-panel';
+  valDiv.innerHTML = `
+    <div class="val-header">
+      <div>
+        <div class="val-label">🛡 Validation Agent</div>
+        <div style="display:flex;align-items:baseline;gap:6px;margin-top:3px">
+          <div class="val-score" style="color:${barColor}">${score}</div>
+          <div style="font-size:10px;color:var(--text3);font-family:var(--mono)">/100 confidence · ${grounding} grounding</div>
+        </div>
+      </div>
+      <span class="val-badge ${badgeClass}">${rec}</span>
+    </div>
+    <div class="val-bar"><div class="val-bar-fill" style="width:${score}%;background:${barColor}"></div></div>
+    <div class="val-claims">
+      ${verified.slice(0,2).map(c => `<div class="val-claim-good">✓ ${escapeHtml(c)}</div>`).join('')}
+      ${unverified.slice(0,2).map(c => `<div class="val-claim-bad">⚠ ${escapeHtml(c)}</div>`).join('')}
+    </div>
+    ${flag ? `<div class="hitl-warning" style="margin-top:8px">
+      <span class="hitl-icon">⚠️</span>
+      <div class="hitl-text"><strong>Human review recommended</strong> — confidence below threshold. Verify key claims against source documents before acting.</div>
+    </div>` : ''}
+  `;
+  bubbleDiv.appendChild(valDiv);
+}
+
+function submitFeedback(msgId, rating, btn) {
   const row = document.getElementById(msgId);
   if (!row) return;
 
