@@ -8,9 +8,7 @@
 
 One thing I've noticed working in international development is how much knowledge gets buried — in project completion reports, sector notes, implementation reviews — documents that exist but are rarely surfaced when they're actually needed.
 
-I wanted to explore what it would look like to build an AI system that could actually *read* those documents and answer questions from them in real time. Not just search keywords, but understand context, retrieve relevant passages, and synthesize insights the way a knowledgeable colleague would.
-
-This project is my attempt at that. It simulates the kind of knowledge agent the World Bank's ITSEF (Independent Evaluation Group) could use to help teams learn from past operations without having to manually dig through hundreds of reports.
+An AI system that simulates the kind of knowledge agent the World Bank's ITSEF (Independent Evaluation Group) could use to help teams learn from past operations without having to manually dig through hundreds of reports.
 
 After getting the agent working, I took it a step further — I wired real-time observability into it so every query gets logged, scored, and visualized on a live monitoring dashboard. That turned it from a prototype into something closer to a production system.
 
@@ -205,7 +203,7 @@ sector-ai-agent/
 
 ## What I Learned
 
-This project pushed me to understand things I hadn't worked with before — vector embeddings, semantic search, how LLMs use retrieved context to ground their answers. I also had to navigate deployment, CORS, environment variables, Python version mismatches, and Supabase database setup from scratch.
+This project pushed me to understand more the things I work with — vector embeddings, semantic search, how LLMs use retrieved context to ground their answers. I also had to navigate deployment, CORS, environment variables, Python version mismatches, and Supabase database setup from scratch.
 
 The observability layer was the most valuable addition. Building the logging system made me think about what actually matters when an AI agent is running in production — not just "does it give good answers" but "how do you *know* it's giving good answers, and how do you spot when it isn't?"
 
