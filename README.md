@@ -216,7 +216,6 @@ The part that surprised me most was how much the *quality of the prompt* affects
 - Add real World Bank ICR documents from the public open data repository
 - Build a multi-sector router that dispatches queries to specialist sub-agents
 - Experiment with Chroma or Pinecone for persistent cloud vector storage
-- Add user feedback (thumbs up/down) to replace heuristic TRACe scoring with real signal
 - Add a document comparison feature ("how did this project's approach differ from similar ones?")
 
 ---
@@ -240,16 +239,11 @@ At scale — 40 queries per analyst per month across a 10-person team — that i
 ---
 
 ## Responsible AI Design
-
 This project was built with responsible AI principles embedded from the start, not added as an afterthought.
-
-**Human-in-the-loop:** Every response includes a TRACe quality score. Responses scoring below 75 display a visible warning — *"Low confidence — recommend human review before acting on this insight."* The Risk Agent specifically surfaces uncertainty rather than hiding it.
-
-**Source transparency:** Every answer cites the exact documents retrieved, with page numbers. Users can verify the source before trusting the insight.
-
-**Hallucination monitoring:** The live dashboard tracks hallucination flag rates over time. A sustained rate above 5% triggers a knowledge base review.
-
-**Scope honesty:** When the knowledge base lacks relevant documents, the agent says so explicitly rather than generating a plausible-sounding but unsourced answer.
+Human-in-the-loop design: A dedicated Validation Agent checks every answer against its source documents before synthesis — scoring grounding confidence from 0 to 100 and flagging unverified claims. Responses scoring below 75 display a visible warning: "Low confidence — recommend human review before acting on this insight." The Risk Agent surfaces uncertainty rather than hiding it. Together these ensure a human remains in the decision chain before insights are acted upon.
+Source transparency: Every answer cites the exact documents retrieved, with page numbers. Users can verify the source before trusting the insight.
+Hallucination monitoring: The live dashboard tracks hallucination flag rates over time. A sustained rate above 5% triggers a knowledge base review.
+Scope honesty: When the knowledge base lacks relevant documents, the agent says so explicitly rather than generating a plausible-sounding but unsourced answer.
 
 ---
 
