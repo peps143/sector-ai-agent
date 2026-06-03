@@ -2,7 +2,7 @@
 ## World Bank ITSEF — Sector Knowledge Operations
 
 **Prepared by:** Perpetual T. Adu  
-**Date:** June 2026  
+**Date:** May 2026  
 **Purpose:** Use case prioritization, ROI framing, and adoption strategy for AI deployment in World Bank sector knowledge operations
 
 ---
