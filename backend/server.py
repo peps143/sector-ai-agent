@@ -15,7 +15,7 @@ from pydantic import BaseModel
 from supabase import create_client, Client
 
 from rag_agent import AgentConfig, SectorAgent
-from pipeline import run_pipeline, get_vectorstore
+from pipeline import run_pipeline, get_store as get_vectorstore
 
 # ── Supabase ──────────────────────────────────────────────────────────────────
 supabase: Client | None = None
